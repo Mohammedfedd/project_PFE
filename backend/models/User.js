@@ -2,14 +2,27 @@ import mongoose from "mongoose";
 
 const schema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
       required: true,
+    },
+    lastName: {
+      type: String,
+      required: false,
     },
     email: {
       type: String,
       required: true,
       unique: true,
+    },
+    phone: {
+      type: String,
+      required: false,
+    },
+    profilePicture: {
+      type: String, 
+      required: false,
+      default: "", 
     },
     password: {
       type: String,

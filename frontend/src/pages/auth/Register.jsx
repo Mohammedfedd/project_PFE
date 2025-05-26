@@ -1,42 +1,53 @@
 import React, { useState, useRef } from "react";
 import "./auth.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { UserData } from "../../context/UserContext";
 
-// Use a generic Gravatar as the default profile picture
 const defaultPfp = "https://www.gravatar.com/avatar/?d=mp&s=200";
 
 const Register = () => {
-  const [preview, setPreview] = useState(defaultPfp); // Default PFP as the initial state
+  const navigate = useNavigate();
+  const { btnLoading, registerUser } = UserData();
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [preview, setPreview] = useState(defaultPfp);
   const fileInputRef = useRef(null);
 
-  // Handle the image change when the user selects a file
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreview(reader.result); // Set the selected image as preview
+        setPreview(reader.result);
       };
-      reader.readAsDataURL(file); // Read the file as base64
+      reader.readAsDataURL(file);
     }
   };
 
-  // Trigger the file input when the user clicks the profile picture
   const triggerFileInput = () => {
     fileInputRef.current.click();
+  };
+
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    await registerUser(firstName, lastName, email, phone, preview, password, navigate);
   };
 
   return (
     <div className="auth-page">
       <div className="auth-form">
         <h2>Register</h2>
-        <form encType="multipart/form-data">
+        <form onSubmit={submitHandler} encType="multipart/form-data">
           {/* Profile Picture */}
           <div style={{ textAlign: "center", marginBottom: "20px" }}>
             <img
-              src={preview} // Display the preview (default or selected)
-              alt="Profile Preview"
-              onClick={triggerFileInput} // Trigger file input on click
+              src={preview}
+              alt="Profile"
+              onClick={triggerFileInput}
               style={{
                 width: "100px",
                 height: "100px",
@@ -48,36 +59,64 @@ const Register = () => {
             />
             <input
               type="file"
-              name="profilePicture"
               accept="image/*"
               ref={fileInputRef}
-              style={{ display: "none" }} // Hide the default file input
-              onChange={handleImageChange} // Handle file input change
+              style={{ display: "none" }}
+              onChange={handleImageChange}
             />
           </div>
 
-          {/* Other Form Fields */}
+          {/* First Name */}
           <label htmlFor="firstName">First Name</label>
-          <input type="text" name="firstName" required />
+          <input
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
 
+          {/* Last Name */}
           <label htmlFor="lastName">Last Name</label>
-          <input type="text" name="lastName" />
+          <input
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
 
+          {/* Email */}
           <label htmlFor="email">Email</label>
-          <input type="email" name="email" required />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
+          {/* Phone */}
           <label htmlFor="phone">Phone</label>
-          <input type="text" name="phone" />
+          <input
+            type="text"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
 
+          {/* Password */}
           <label htmlFor="password">Password</label>
-          <input type="password" name="password" required />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-          <button type="submit" className="common-btn">
-            Register
+          {/* Submit Button */}
+          <button type="submit" disabled={btnLoading} className="common-btn">
+            {btnLoading ? "Please Wait..." : "Register"}
           </button>
         </form>
+
         <p>
-          Have an account already? <Link to="/login">Sign up!</Link>
+          have an account? <Link to="/login">Login</Link>
         </p>
       </div>
     </div>

@@ -1,0 +1,144 @@
+/* courseCard.css */
+:root {
+  --primary-color: #4361ee;
+  --secondary-color: #3f37c9;
+  --accent-color: #f72585;
+  --light-color: #f8f9fa;
+  --dark-color: #212529;
+  --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  --card-radius: 12px;
+  --transition: all 0.3s ease;
+}
+
+.course-card {
+  position: relative;
+  background: white;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  max-width: 340px;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+}
+
+.course-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.course-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-bottom: 3px solid var(--primary-color);
+}
+
+.course-card h3 {
+  color: var(--dark-color);
+  font-size: 1.4rem;
+  margin: 1rem 1rem 0.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-card p {
+  color: #555;
+  padding: 0 1rem;
+  margin: 0.4rem 0;
+  font-size: 1rem;
+}
+
+.course-card p:last-of-type {
+  margin-bottom: 1rem;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.common-btn {
+  cursor: pointer;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition);
+  margin: 0.5rem 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.common-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(67, 97, 238, 0.3);
+}
+
+.common-btn:active {
+  transform: translateY(0);
+}
+
+/* Admin delete button styling */
+.common-btn[style*="background: red"] {
+  background: #ff3547 !important;
+  margin-top: auto;
+}
+
+.common-btn[style*="background: red"]:hover {
+  background: #ff0015 !important;
+  box-shadow: 0 5px 10px rgba(255, 53, 71, 0.3);
+}
+
+/* Ribbon label for courses that user has enrolled in */
+.course-card:has(button:contains("Study")) {
+  position: relative;
+}
+
+.course-card:has(button:contains("Study"))::before {
+  content: "Enrolled";
+  position: absolute;
+  top: 20px;
+  right: -30px;
+  background: var(--accent-color);
+  color: white;
+  padding: 5px 30px;
+  transform: rotate(45deg);
+  font-size: 0.8rem;
+  font-weight: bold;
+  z-index: 1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Media queries for responsiveness */
+@media screen and (max-width: 768px) {
+  .course-card {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+  }
+}
+
+/* Animation for cards when they appear */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.course-card {
+  animation: fadeIn 0.5s ease-out forwards;
+}

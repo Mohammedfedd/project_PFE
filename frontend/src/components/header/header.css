@@ -107,18 +107,18 @@ header {
   font-weight: 600;
   position: relative;
   display: inline-block;
-  
-  &:after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 3px;
-    background-color: #4cd137;
-    border-radius: 2px;
-  }
+}
+
+.auth-form h2:after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background-color: #4cd137;
+  border-radius: 2px;
 }
 
 .auth-form form {

@@ -1,0 +1,94 @@
+.payment-cancelled-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f6f6f6;
+  position: relative;
+  overflow: hidden;
+}
+
+.cancelled-container {
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.cancelled-icon-wrapper {
+  margin-bottom: 20px;
+}
+
+.cancelled-icon svg {
+  width: 72px;
+  height: 72px;
+  stroke: #e74c3c;
+  stroke-width: 3;
+}
+
+.crossmark-circle {
+  stroke-dasharray: 157;
+  stroke-dashoffset: 0;
+  stroke: #e74c3c;
+}
+
+.crossmark-cross1,
+.crossmark-cross2 {
+  stroke-dasharray: 28;
+  stroke-dashoffset: 28;
+  stroke: #e74c3c;
+  stroke-linecap: round;
+  animation: drawCross 0.4s ease forwards;
+  animation-delay: 0.3s;
+}
+
+.crossmark-cross2 {
+  animation-delay: 0.45s;
+}
+
+.cancelled-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #e74c3c;
+  margin-bottom: 12px;
+}
+
+.cancelled-message {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
+
+.cta-button.muted {
+  background-color: #e74c3c;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.cta-button.muted:hover {
+  background-color: #c0392b;
+}
+
+@keyframes drawCross {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

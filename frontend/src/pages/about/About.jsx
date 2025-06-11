@@ -1,12 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./about.css";
 import { FaGraduationCap, FaUsers, FaChalkboardTeacher } from "react-icons/fa";
+import Loading from "../../components/loading/Loading.jsx"; // Adjust path if needed
 
 const About = () => {
   const navigate = useNavigate();
+  const [pageLoading, setPageLoading] = useState(true);
+
   useEffect(() => {
-    const animateCounters = () => {
+    // Simulate real data loading or complex calculations
+    const loadPage = () => {
       const counters = document.querySelectorAll(".stat-number");
       const speed = 200;
 
@@ -17,15 +21,23 @@ const About = () => {
 
         if (count < target) {
           counter.innerText = Math.ceil(count + increment) + "+";
-          setTimeout(animateCounters, 1);
+          setTimeout(loadPage, 1);
         } else {
           counter.innerText = target + "+";
         }
       });
     };
 
-    animateCounters();
+    // Simulate loading delay before showing content
+    const timer = setTimeout(() => {
+      loadPage();
+      setPageLoading(false);
+    }, 800); // 800ms delay simulating data fetch
+
+    return () => clearTimeout(timer);
   }, []);
+
+  if (pageLoading) return <Loading />;
 
   return (
     <div className="about-section">
@@ -89,23 +101,23 @@ const About = () => {
             </div>
           </div>
 
-        <div className="mission-statement">
-  <div className="mission-content">
-    <h3>Our Mission</h3>
-    <p>
-      To make <span className="accent">quality education accessible</span> to everyone, everywhere, 
-      breaking down barriers and creating opportunities for growth, 
-      career advancement, and personal fulfillment.
-    </p>
-  </div>
-  <div className="mission-image">
-    <img
-      src="https://images.pexels.com/photos/5212325/pexels-photo-5212325.jpeg"
-      alt="Mentorship and guidance"
-      className="mission-img"
-    />
-  </div>
-</div>
+          <div className="mission-statement">
+            <div className="mission-content">
+              <h3>Our Mission</h3>
+              <p>
+                To make <span className="accent">quality education accessible</span> to everyone, everywhere, 
+                breaking down barriers and creating opportunities for growth, 
+                career advancement, and personal fulfillment.
+              </p>
+            </div>
+            <div className="mission-image">
+              <img
+                src="https://images.pexels.com/photos/5212325/pexels-photo-5212325.jpeg"
+                alt="Mentorship and guidance"
+                className="mission-img"
+              />
+            </div>
+          </div>
 
           <div className="testimonial">
             <div className="quote-icon">"</div>

@@ -1,19 +1,45 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./coursedescription.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import { UserData } from "../../context/UserContext";
 import { server } from "../../main";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const CourseDescription = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = UserData();
-  const { fetchCourse, course } = CourseData();
+  const [loading, setLoading] = useState(false);
+  const { fetchCourse, course, fetchMyCourse, fetchCourses } = CourseData();
 
   useEffect(() => {
     fetchCourse(id);
   }, [id]);
+
+  const checkoutHandler = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      // Call backend to create a Stripe checkout session
+      const { data } = await axios.post(
+        `${server}/api/course/checkout/${id}`,
+        {},
+        {
+          headers: { token },
+        }
+      );
+
+      // Redirect user to Stripe Checkout hosted page
+      window.location.href = data.url;
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Checkout failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="course-description-wrapper">
@@ -31,7 +57,6 @@ const CourseDescription = () => {
 
             <div className="course-header">
               <h1>{course.title}</h1>
-
               <div className="course-meta">
                 <span className="instructor">
                   <i className="fas fa-user-tie"></i> {course.createdBy}
@@ -39,9 +64,7 @@ const CourseDescription = () => {
                 <span className="duration">
                   <i className="far fa-clock"></i> {course.duration} weeks
                 </span>
-
               </div>
-
               <div className="price-badge">{course.price} MAD</div>
             </div>
           </div>
@@ -61,10 +84,12 @@ const CourseDescription = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => navigate(`/course/${course._id}`)}
+                  onClick={checkoutHandler}
                   className="enroll-btn"
+                  disabled={loading}
                 >
-                  <i className="fas fa-graduation-cap"></i> Enroll Now
+                  <i className="fas fa-graduation-cap"></i>{" "}
+                  {loading ? "Processing..." : "Enroll Now"}
                 </button>
               )}
             </div>

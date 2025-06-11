@@ -101,12 +101,12 @@ const Home = () => {
         <h2 className="section-title">Popular Categories</h2>
         <div className="courses-grid">
           {featuredCourses.map((course, index) => (
-            <div key={index} className="course-card" onClick={() => navigate("/courses")}>
-              <div className="course-icon">{course.icon}</div>
-              <h3>{course.title}</h3>
-              <p>{course.desc}</p>
-            </div>
-          ))}
+  <div key={index} className="category-card" onClick={() => navigate("/courses")}>
+    <div className="category-icon">{course.icon}</div>
+    <h3>{course.title}</h3>
+    <p>{course.desc}</p>
+  </div>
+))}
         </div>
       </section>
 

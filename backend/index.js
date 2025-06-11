@@ -1,17 +1,28 @@
 import express from "express";
 import dotenv from "dotenv";
-import { connectDb } from "./database/db.js";
 import Stripe from "stripe";
-import cors from 'cors'
+import cors from 'cors';
+import { connectDb } from "./database/db.js";
+
 dotenv.config();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-app.use(cors());
+
+// <-- Put your CORS setup right here
+app.use(cors({
+  origin: 'http://localhost:5173',  // your React frontend URL
+  credentials: true,
+}));
+
+// Routes go here after CORS
+app.use("/api", userRoutes);
+app.use("/api", courseRoutes);
+app.use("/api", adminRoutes);
 
 const port = process.env.PORT || 5000;
 

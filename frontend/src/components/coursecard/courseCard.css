@@ -18,10 +18,13 @@
   box-shadow: var(--shadow);
   transition: var(--transition);
   max-width: 340px;
-  height: 450px;
+  height: 540px; /* ⬅️ fixed height to fit all content */
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
   margin: 1rem;
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
 .course-card:hover {
@@ -31,24 +34,19 @@
 
 .course-image {
   width: 100%;
-  height: 180px;
+  height: 160px; /* smaller image to make space */
   object-fit: cover;
   border-bottom: 3px solid var(--primary-color);
 }
 
 .course-card h3 {
   color: var(--dark-color);
-  font-size: 1.4rem;
-  margin: 1rem 1rem 0.5rem;
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
   font-weight: 700;
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.4;
+  padding: 0 1rem;
 }
-
 .course-card p {
   color: #555;
   padding: 0 1rem;

@@ -10,7 +10,7 @@ import { FaUserCircle } from "react-icons/fa";
 const Account = ({ user }) => {
   const { setIsAuth, setUser } = UserData();
   const navigate = useNavigate();
-  const [isZoomed, setIsZoomed] = useState(false); // <- New state
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const logoutHandler = () => {
     localStorage.clear();
@@ -24,6 +24,11 @@ const Account = ({ user }) => {
     setIsZoomed(!isZoomed);
   };
 
+  const dashboardHandler = () => {
+    // Use full page reload to dashboard URL
+    window.location.href = `/${user._id}/dashboard`;
+  };
+
   return (
     <div className="account-container">
       {user && (
@@ -31,7 +36,11 @@ const Account = ({ user }) => {
           <div className="profile-banner"></div>
 
           <div className="profile-content">
-            <div className="avatar-wrapper" onClick={toggleZoom} style={{ cursor: 'pointer' }}>
+            <div
+              className="avatar-wrapper"
+              onClick={toggleZoom}
+              style={{ cursor: "pointer" }}
+            >
               {user.profilePicture ? (
                 <img
                   src={user.profilePicture}
@@ -53,10 +62,7 @@ const Account = ({ user }) => {
             </div>
 
             <div className="action-buttons">
-              <button
-                onClick={() => navigate(`/${user._id}/dashboard`)}
-                className="dashboard-btn"
-              >
+              <button onClick={dashboardHandler} className="dashboard-btn">
                 <MdDashboard className="btn-icon" />
                 Dashboard
               </button>
@@ -70,20 +76,19 @@ const Account = ({ user }) => {
         </div>
       )}
 
-      {/* Zoom Modal */}
-     {isZoomed && user?.profilePicture && (
-  <div className="zoom-overlay" onClick={toggleZoom}>
-    <div className="zoom-content">
-      <img
-        src={user.profilePicture}
-        alt="Zoomed Profile"
-        className="zoomed-image"
-      />
-    </div>
-  </div>
-)}
+      {isZoomed && user?.profilePicture && (
+        <div className="zoom-overlay" onClick={toggleZoom}>
+          <div className="zoom-content">
+            <img
+              src={user.profilePicture}
+              alt="Zoomed Profile"
+              className="zoomed-image"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Account
+export default Account;

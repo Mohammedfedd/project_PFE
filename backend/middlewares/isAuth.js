@@ -1,32 +1,39 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
-export const isAuth = async(req,res,next)=>{
-    try{
-        const token =req.headers.token
-        if(!token)
-        return res.status(403).json({
-        message:"Login required"
-        });
-        const decodedData = jwt.verify(token,process.env.Jwt_Sec);
-        req.user=await User.findById(decodedData._id);
-        next();
-    }catch(error){
-        res.status(500).json({
-            message:"You must login"
-        });
+
+export const isAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(403).json({
+        message: "Login required",
+      });
     }
-}
-export const isAdmin =(req,res,next)=>{
-    try {
-        if(req.user.role!=="admin")
-            return res.status(403).json({
-            message :"Access denied",
-        });
-        next();
-    } catch (error) {
-        res.status(500).json({
-            message:error.message,
-        });
-        
+
+    const token = authHeader.split(" ")[1];
+    const decodedData = jwt.verify(token, process.env.Jwt_Sec);
+
+    req.user = await User.findById(decodedData._id);
+    next();
+  } catch (error) {
+    res.status(500).json({
+      message: "You must login",
+    });
+  }
+};
+
+export const isAdmin = (req, res, next) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "Access denied",
+      });
     }
-}
+    next();
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};

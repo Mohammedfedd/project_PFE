@@ -99,23 +99,19 @@ export const UserContextProvider = ({ children }) => {
   }
 
   // New function: Edit user profile
-  async function editUserProfile(formData) {
-    setBtnLoading(true);
-    try {
-      const { data } = await axios.put(`${server}/api/user/edit-profile`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      toast.success(data.message || "Profile updated successfully");
-      if (data.user) setUser(data.user);
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Profile update failed");
-    } finally {
-      setBtnLoading(false);
-    }
+async function editUserProfile(formData) {
+  setBtnLoading(true);
+  try {
+    const { data } = await axios.put(`${server}/api/user/edit-profile`, formData); 
+    // Removed manual headers, axios will set to application/json
+    toast.success(data.message || "Profile updated successfully");
+    if (data.user) setUser(data.user);
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Profile update failed");
+  } finally {
+    setBtnLoading(false);
   }
+}
 
   return (
     <UserContext.Provider

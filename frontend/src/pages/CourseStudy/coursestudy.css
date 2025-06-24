@@ -1,0 +1,110 @@
+.study-hero {
+  background: linear-gradient(to right, #141e30, #243b55);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.study-glass {
+  max-width: 1000px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.study-banner {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+
+.study-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.study-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.study-content {
+  padding: 2rem;
+  color: #fff;
+}
+
+.study-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.study-description {
+  font-size: 1.05rem;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+}
+
+.study-meta p {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.study-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #00b894;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.study-btn:hover {
+  background: #019474;
+}
+
+.study-btn span {
+  font-size: 1.5rem;
+}
+
+.btn-subtext {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* Optional: Responsive Design */
+@media (max-width: 768px) {
+  .study-content {
+    padding: 1.2rem;
+  }
+
+  .study-title {
+    font-size: 1.7rem;
+  }
+
+  .study-hero {
+    padding: 1rem;
+  }
+}

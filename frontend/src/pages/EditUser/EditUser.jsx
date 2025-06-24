@@ -10,16 +10,17 @@ const EditUser = () => {
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
+    profilePicture: "", // base64 string
   });
-  const [preview, setPreview] = useState(defaultPfp);
-  const [pfpFile, setPfpFile] = useState(null);
-  const [status, setStatus] = useState({ type: "", message: "" });
 
+  const [preview, setPreview] = useState(defaultPfp);
   const fileInputRef = useRef(null);
+  const [status, setStatus] = useState({ type: "", message: "" });
 
   useEffect(() => {
     if (user && user.profilePicture) {
       setPreview(user.profilePicture);
+      setFormData((prev) => ({ ...prev, profilePicture: user.profilePicture }));
     } else {
       setPreview(defaultPfp);
     }
@@ -30,10 +31,10 @@ const EditUser = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setPfpFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);
+        setFormData((prev) => ({ ...prev, profilePicture: reader.result }));
       };
       reader.readAsDataURL(file);
     }
@@ -51,29 +52,36 @@ const EditUser = () => {
     e.preventDefault();
     setStatus({ type: "", message: "" });
 
-    const { currentPassword, newPassword, confirmNewPassword } = formData;
+    const { currentPassword, newPassword, confirmNewPassword, profilePicture } = formData;
 
-    if (!currentPassword) {
-      return setStatus({ type: "error", message: "Current password is required." });
+    if (!currentPassword && !profilePicture) {
+      return setStatus({
+        type: "error",
+        message: "Either password or profile picture must be provided.",
+      });
     }
 
     if (newPassword && newPassword !== confirmNewPassword) {
       return setStatus({ type: "error", message: "New passwords do not match." });
     }
 
-    const form = new FormData();
-    form.append("password", currentPassword);
-    if (newPassword) form.append("newPassword", newPassword);
-    if (pfpFile) form.append("profilePicture", pfpFile);
+    const body = {
+      currentPassword,
+      profilePicture, // base64 string
+    };
+    if (newPassword) {
+      body.newPassword = newPassword;
+    }
 
     try {
-      await editUserProfile(form);
+      await editUserProfile(body); // sending JSON with base64 image string
+      setStatus({ type: "success", message: "Profile updated successfully!" });
       setFormData({
         currentPassword: "",
         newPassword: "",
         confirmNewPassword: "",
+        profilePicture,
       });
-      setPfpFile(null);
     } catch (error) {
       setStatus({ type: "error", message: "Update failed. Try again." });
     }
@@ -90,7 +98,7 @@ const EditUser = () => {
           </p>
         )}
 
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <form onSubmit={handleSubmit}>
           <div style={{ textAlign: "center", marginBottom: "20px" }}>
             <img
               src={preview}
@@ -114,13 +122,13 @@ const EditUser = () => {
             />
           </div>
 
-          <label>Current Password (required)</label>
+          <label>Current Password (required for password change)</label>
           <input
             type="password"
             name="currentPassword"
             value={formData.currentPassword}
             onChange={handleInputChange}
-            required
+            required={!!formData.newPassword}
           />
 
           <label>New Password (leave blank to keep current)</label>

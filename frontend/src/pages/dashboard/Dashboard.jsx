@@ -2,20 +2,27 @@ import React, { useState, useMemo, useEffect } from "react";
 import "./dashboard.css";
 import { CourseData } from "../../context/CourseContext";
 import CourseCard from "../../components/coursecard/CourseCard";
+import Loading from "../../components/loading/Loading"; // Make sure this exists
 
 const Dashboard = () => {
   const { mycourse, fetchMyCourse } = CourseData();
   const [activeFilter, setActiveFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
 
-  // Fetch enrolled courses when Dashboard mounts
+  // Fetch enrolled courses on mount only
   useEffect(() => {
-    fetchMyCourse();
-  }, [fetchMyCourse]);
+    const fetchData = async () => {
+      setLoading(true);
+      await fetchMyCourse();
+      setLoading(false);
+    };
+    fetchData();
+  }, []); // DON'T include fetchMyCourse to avoid infinite loop
 
   // Filter courses based on active filter
   const filteredCourses = useMemo(() => {
     if (!mycourse || mycourse.length === 0) return [];
-    
+
     switch (activeFilter) {
       case 'completed':
         return mycourse.filter(course => course.completed || course.progress === 100);
@@ -32,10 +39,10 @@ const Dashboard = () => {
     if (!mycourse || mycourse.length === 0) {
       return { total: 0, completed: 0, inProgress: 0 };
     }
-    
+
     const completed = mycourse.filter(course => course.completed || course.progress === 100).length;
     const inProgress = mycourse.filter(course => !course.completed && course.progress !== 100 && (course.progress > 0 || course.started)).length;
-    
+
     return {
       total: mycourse.length,
       completed,
@@ -46,6 +53,10 @@ const Dashboard = () => {
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
   };
+
+  if (loading) {
+    return <Loading />; // Your existing loading component
+  }
 
   return (
     <div className="student-dashboard">
@@ -80,25 +91,25 @@ const Dashboard = () => {
       <div className="dashboard-main">
         <div className="section-header">
           <h2 className="section-title">
-            Your Courses 
+            Your Courses
             {activeFilter !== 'all' && (
               <span className="filter-count">({filteredCourses.length})</span>
             )}
           </h2>
           <div className="section-actions">
-            <button 
+            <button
               className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
               onClick={() => handleFilterChange('all')}
             >
               All Courses
             </button>
-            <button 
+            <button
               className={`filter-btn ${activeFilter === 'inProgress' ? 'active' : ''}`}
               onClick={() => handleFilterChange('inProgress')}
             >
               In Progress
             </button>
-            <button 
+            <button
               className={`filter-btn ${activeFilter === 'completed' ? 'active' : ''}`}
               onClick={() => handleFilterChange('completed')}
             >
@@ -109,15 +120,13 @@ const Dashboard = () => {
 
         <div className="dashboard-content">
           {filteredCourses && filteredCourses.length > 0 ? (
-            <>
-              <div className="courses-grid">
-                {filteredCourses.map((course) => (
-                  <div key={course._id} className="course-wrapper">
-                    <CourseCard course={course} />
-                  </div>
-                ))}
-              </div>
-            </>
+            <div className="courses-grid">
+              {filteredCourses.map((course) => (
+                <div key={course._id} className="course-wrapper">
+                  <CourseCard course={course} />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="empty-state">
               <div className="empty-icon">
@@ -134,20 +143,18 @@ const Dashboard = () => {
                 </svg>
               </div>
               <h3 className="empty-title">
-                {activeFilter === 'all' 
+                {activeFilter === 'all'
                   ? 'No courses enrolled yet'
                   : activeFilter === 'completed'
                   ? 'No completed courses yet'
-                  : 'No courses in progress'
-                }
+                  : 'No courses in progress'}
               </h3>
               <p className="empty-description">
-                {activeFilter === 'all' 
+                {activeFilter === 'all'
                   ? 'Start your learning journey by exploring our course catalog'
                   : activeFilter === 'completed'
                   ? 'Complete some courses to see them here'
-                  : 'Start learning to see your progress here'
-                }
+                  : 'Start learning to see your progress here'}
               </p>
               {activeFilter === 'all' && (
                 <button className="cta-button">

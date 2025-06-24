@@ -16,6 +16,9 @@ import CourseDescription from './pages/coursedescription/CourseDescription.jsx';
 import PaymentCanceled from './pages/paymentcanceled/PaymentCanceled.jsx';
 import Loading from './components/loading/Loading.jsx';
 import Dashboard from './pages/dashboard/Dashboard.jsx';
+import RefundCourse from './pages/refundcourse/RefundCourse.jsx';
+import EditUser from './pages/edituser/EditUser.jsx';
+
 
 const App = () => {
   const { isAuth, user, loading: authLoading } = UserData();
@@ -36,9 +39,15 @@ const App = () => {
         <Route path="/register" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Register setPageLoading={setPageLoading} />} />
         <Route path="/verify" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Verify setPageLoading={setPageLoading} />} />
         <Route path="/course/:id" element={isAuth ? <CourseDescription setPageLoading={setPageLoading} /> : <Login setPageLoading={setPageLoading} />} />
-        <Route path="/payment-success" element={<PaymentSuccess setPageLoading={setPageLoading} />} />
+        <Route path="/payment-success" element={<PaymentSuccess user={user} setPageLoading={setPageLoading} />} />
         <Route path="/payment-cancel" element={<PaymentCanceled setPageLoading={setPageLoading} />} />
         <Route path="/:id/dashboard" element={<Dashboard user={user} setPageLoading={setPageLoading} />} />
+        <Route path="/refund/:courseId" element={<RefundCourse user={user} />} />
+        <Route path=":id/edit-profile" element={isAuth ? <EditUser user={user} /> : <Login setPageLoading={setPageLoading} />} />
+
+        
+        
+
 
       </Routes>
       <Footer />

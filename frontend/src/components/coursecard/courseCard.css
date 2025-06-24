@@ -18,7 +18,7 @@
   box-shadow: var(--shadow);
   transition: var(--transition);
   max-width: 340px;
-  height: 540px; /* ⬅️ fixed height to fit all content */
+  min-height: 540px; /* ✅ Flexible height */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -34,7 +34,7 @@
 
 .course-image {
   width: 100%;
-  height: 160px; /* smaller image to make space */
+  height: 160px;
   object-fit: cover;
   border-bottom: 3px solid var(--primary-color);
 }
@@ -47,6 +47,7 @@
   line-height: 1.4;
   padding: 0 1rem;
 }
+
 .course-card p {
   color: #555;
   padding: 0 1rem;
@@ -60,6 +61,16 @@
   font-weight: 600;
 }
 
+/* ✅ Button container to stack properly */
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+  margin-top: auto;
+}
+
+/* ✅ Reusable button style */
 .common-btn {
   cursor: pointer;
   background: var(--primary-color);
@@ -70,7 +81,6 @@
   font-weight: 600;
   font-size: 1rem;
   transition: var(--transition);
-  margin: 0.5rem 1rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -85,22 +95,26 @@
   transform: translateY(0);
 }
 
-/* Admin delete button styling */
-.common-btn[style*="background: red"] {
+/* ✅ Admin Delete button */
+.admin-delete {
   background: #ff3547 !important;
-  margin-top: auto;
 }
 
-.common-btn[style*="background: red"]:hover {
+.admin-delete:hover {
   background: #ff0015 !important;
   box-shadow: 0 5px 10px rgba(255, 53, 71, 0.3);
 }
 
-/* Ribbon label for courses that user has enrolled in */
-.course-card:has(button:contains("Study")) {
-  position: relative;
+/* ✅ Refund button */
+.refund-btn {
+  background: #ff8800;
 }
 
+.refund-btn:hover {
+  background: #e07b00;
+}
+
+/* ✅ Ribbon for enrolled courses */
 .course-card:has(button:contains("Study"))::before {
   content: "Enrolled";
   position: absolute;
@@ -116,16 +130,16 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Media queries for responsiveness */
+/* ✅ Responsive layout */
 @media screen and (max-width: 768px) {
   .course-card {
     max-width: 100%;
-    height: auto;
+    min-height: auto;
     margin: 1rem 0;
   }
 }
 
-/* Animation for cards when they appear */
+/* ✅ Fade animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -135,8 +149,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.course-card {
-  animation: fadeIn 0.5s ease-out forwards;
 }

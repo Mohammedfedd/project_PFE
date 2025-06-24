@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import "./PaymentSuccess.css";
 
-const PaymentSuccess = () => {
+const PaymentSuccess = ({ user }) => {
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session_id");
 
@@ -26,14 +26,10 @@ const PaymentSuccess = () => {
           console.log("✅ Payment verified:", res.data);
         })
         .catch((err) => {
-          console.error(
-            "❌ Payment verification failed:",
-            err.response?.data || err.message
-          );
+          console.error("❌ Payment verification failed:", err.response?.data || err.message);
         });
     }
 
-    // Staggered animations
     setTimeout(() => setShowContent(true), 300);
     setTimeout(() => setShowConfetti(true), 800);
     setTimeout(() => setShowEmoji(true), 1200);
@@ -41,7 +37,6 @@ const PaymentSuccess = () => {
     setTimeout(() => setShowInfo(true), 2200);
   }, [sessionId]);
 
-  // Confetti pieces
   const confettiPieces = Array.from({ length: 100 }, (_, i) => {
     const shapes = ["rect", "circle", "triangle"];
     const shape = shapes[Math.floor(Math.random() * shapes.length)];
@@ -81,7 +76,6 @@ const PaymentSuccess = () => {
     );
   });
 
-  // Floating orbs
   const floatingOrbs = Array.from({ length: 8 }, (_, i) => {
     const size = `${Math.random() * 200 + 50}px`;
     const posX = `${Math.random() * 100}%`;
@@ -102,11 +96,11 @@ const PaymentSuccess = () => {
           animationDuration: duration,
           background: `radial-gradient(circle, 
             rgba(${Math.floor(Math.random() * 255)},${Math.floor(
-          Math.random() * 255
-        )},${Math.floor(Math.random() * 255)},0.3) 0%, 
+              Math.random() * 255
+            )},${Math.floor(Math.random() * 255)},0.3) 0%, 
             rgba(${Math.floor(Math.random() * 255)},${Math.floor(
-          Math.random() * 255
-        )},${Math.floor(Math.random() * 255)},0) 70%)`,
+              Math.random() * 255
+            )},${Math.floor(Math.random() * 255)},0) 70%)`,
         }}
       />
     );
@@ -114,15 +108,11 @@ const PaymentSuccess = () => {
 
   return (
     <div className="payment-success-wrapper">
-      {/* Animated Background */}
       <div className="animated-bg">{floatingOrbs}</div>
 
-      {/* Confetti */}
       {showConfetti && <div className="confetti-container">{confettiPieces}</div>}
 
-      {/* Main Content */}
       <div className={`payment-success-container ${showContent ? "show" : ""}`}>
-        {/* Success Icon */}
         <div className="success-icon-wrapper">
           <div className="success-icon">
             <svg viewBox="0 0 52 52" className="checkmark">
@@ -156,7 +146,6 @@ const PaymentSuccess = () => {
           </div>
         </div>
 
-        {/* Success Message */}
         <div className="success-content">
           <h1 className="success-title">
             <span className={`party-emoji ${showEmoji ? "pop" : ""}`}>🎉</span>
@@ -180,9 +169,13 @@ const PaymentSuccess = () => {
           </p>
         </div>
 
-        {/* Action Button */}
         <div className={`action-section ${showButton ? "show" : ""}`}>
-          <Link to="/mycourses" className="cta-button">
+          <button
+            className="cta-button"
+            onClick={() => {
+              window.location.href = `/${user._id}/dashboard`;
+            }}
+          >
             <span className="button-text">Go to My Courses</span>
             <span className="button-icon">
               <svg viewBox="0 0 24 24" width="24" height="24">
@@ -193,10 +186,9 @@ const PaymentSuccess = () => {
               </svg>
             </span>
             <span className="button-hover-effect"></span>
-          </Link>
+          </button>
         </div>
 
-        {/* Additional Info */}
         <div className={`additional-info ${showInfo ? "show" : ""}`}>
           <p>
             <svg

@@ -6,6 +6,7 @@ import { UserData } from "../../context/UserContext";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
+import { FiEdit } from "react-icons/fi"; // Icon for edit
 
 const Account = ({ user }) => {
   const { setIsAuth, setUser } = UserData();
@@ -25,8 +26,12 @@ const Account = ({ user }) => {
   };
 
   const dashboardHandler = () => {
-    // Use full page reload to dashboard URL
     window.location.href = `/${user._id}/dashboard`;
+  };
+
+  // Edited to force full browser reload
+  const editProfileHandler = () => {
+    window.location.href = `/${user._id}/edit-profile`;
   };
 
   return (
@@ -65,6 +70,11 @@ const Account = ({ user }) => {
               <button onClick={dashboardHandler} className="dashboard-btn">
                 <MdDashboard className="btn-icon" />
                 Dashboard
+              </button>
+
+              <button onClick={editProfileHandler} className="dashboard-btn">
+                <FiEdit className="btn-icon" />
+                Edit Profile
               </button>
 
               <button onClick={logoutHandler} className="logout-btn">

@@ -10,7 +10,6 @@ import { CourseData } from "../../context/CourseContext";
 const CourseCard = ({ course }) => {
   const navigate = useNavigate();
   const { user, isAuth } = UserData();
-
   const { fetchCourses } = CourseData();
 
   const deleteHandler = async (id) => {
@@ -25,28 +24,40 @@ const CourseCard = ({ course }) => {
         toast.success(data.message);
         fetchCourses();
       } catch (error) {
-        toast.error(error.response.data.message);
+        toast.error(error.response?.data?.message || "Delete failed");
       }
     }
   };
+
   return (
     <div className="course-card">
       <img src={`${server}/${course.image}`} alt="" className="course-image" />
       <h3>{course.title}</h3>
-      <p>Instructor- {course.createdBy}</p>
-      <p>Duration- {course.duration} weeks</p>
-      <p>Price- {course.price} MAD</p>
+      <p>Instructor - {course.createdBy}</p>
+      <p>Duration - {course.duration} weeks</p>
+      <p>Price - {course.price} MAD</p>
+
       {isAuth ? (
         <>
           {user && user.role !== "admin" ? (
             <>
               {user.subscription.includes(course._id) ? (
-                <button
-                  onClick={() => navigate(`/course/study/${course._id}`)}
-                  className="common-btn"
-                >
-                  Study
-                </button>
+                <>
+                  <button
+                    onClick={() => navigate(`/course/study/${course._id}`)}
+                    className="common-btn"
+                  >
+                    Study
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/refund/${course._id}`)}
+                    className="common-btn"
+                    style={{ backgroundColor: "#ff4d4f", marginTop: "8px" }}
+                  >
+                    Request Refund
+                  </button>
+                </>
               ) : (
                 <button
                   onClick={() => navigate(`/course/${course._id}`)}
@@ -77,7 +88,7 @@ const CourseCard = ({ course }) => {
         <button
           onClick={() => deleteHandler(course._id)}
           className="common-btn"
-          style={{ background: "red" }}
+          style={{ background: "red", marginTop: "8px" }}
         >
           Delete
         </button>

@@ -11,7 +11,6 @@ export const UserContextProvider = ({ children }) => {
   const [btnLoading, setBtnLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Set axios default Authorization header
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -31,7 +30,6 @@ export const UserContextProvider = ({ children }) => {
 
       toast.success(data.message);
 
-      // ✅ Save token and set header
       localStorage.setItem("token", data.token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
@@ -100,6 +98,25 @@ export const UserContextProvider = ({ children }) => {
     }
   }
 
+  // New function: Edit user profile
+  async function editUserProfile(formData) {
+    setBtnLoading(true);
+    try {
+      const { data } = await axios.put(`${server}/api/user/edit-profile`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success(data.message || "Profile updated successfully");
+      if (data.user) setUser(data.user);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Profile update failed");
+    } finally {
+      setBtnLoading(false);
+    }
+  }
+
   return (
     <UserContext.Provider
       value={{
@@ -112,6 +129,7 @@ export const UserContextProvider = ({ children }) => {
         loading,
         registerUser,
         verifyOtp,
+        editUserProfile, // expose here
       }}
     >
       {children}

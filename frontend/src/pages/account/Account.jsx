@@ -34,6 +34,11 @@ const Account = ({ user }) => {
     window.location.href = `/${user._id}/edit-profile`;
   };
 
+  // Force full page reload for admin dashboard
+  const adminDashboardHandler = () => {
+    window.location.href = "/admin/dashboard";
+  };
+
   return (
     <div className="account-container">
       {user && (
@@ -71,6 +76,16 @@ const Account = ({ user }) => {
                 <MdDashboard className="btn-icon" />
                 Dashboard
               </button>
+
+              {user.role === "admin" && (
+                <button
+                  onClick={adminDashboardHandler}
+                  className="dashboard-btn"
+                >
+                  <MdDashboard className="btn-icon" />
+                  Admin Dashboard
+                </button>
+              )}
 
               <button onClick={editProfileHandler} className="dashboard-btn">
                 <FiEdit className="btn-icon" />

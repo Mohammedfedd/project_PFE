@@ -5,7 +5,6 @@ import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
 import toast from "react-hot-toast";
 
-
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
   const [lecture, setLecture] = useState([]);
@@ -19,14 +18,21 @@ const Lecture = ({ user }) => {
   const [video, setvideo] = useState("");
   const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
-const TiTick = () => "✓";
-const TiPlus = () => "+";
-const TiTrash = () => "🗑️";
-const TiVideo = () => "▶️";
-const TiDocument = () => "📄";
-const TiUpload = () => "⬆️";
-const TiArrowLeft = () => "←";
-const TiPlay = () => "▶";
+  
+  // New state for auto-progress and completion tracking
+  const [currentLectureIndex, setCurrentLectureIndex] = useState(0);
+  const [isVideoCompleted, setIsVideoCompleted] = useState(false);
+  const [autoProgressCountdown, setAutoProgressCountdown] = useState(0);
+  const [showCompletionMessage, setShowCompletionMessage] = useState(false);
+
+  const TiTick = () => "✓";
+  const TiPlus = () => "+";
+  const TiTrash = () => "🗑️";
+  const TiVideo = () => "▶️";
+  const TiDocument = () => "📄";
+  const TiUpload = () => "⬆️";
+  const TiArrowLeft = () => "←";
+  const TiPlay = () => "▶";
 
   if (user && user.role !== "admin" && !user.subscription.includes(params.id))
     return navigate("/");
@@ -48,6 +54,10 @@ const TiPlay = () => "▶";
 
   async function fetchLecture(id) {
     setLecLoading(true);
+    setIsVideoCompleted(false);
+    setShowCompletionMessage(false);
+    setAutoProgressCountdown(0);
+    
     try {
       const { data } = await axios.get(`${server}/api/lecture/${id}`, {
         headers: {
@@ -55,6 +65,11 @@ const TiPlay = () => "▶";
         },
       });
       setLecture(data.lecture);
+      
+      // Update current lecture index
+      const lectureIndex = lectures.findIndex(lec => lec._id === id);
+      setCurrentLectureIndex(lectureIndex);
+      
       setLecLoading(false);
     } catch (error) {
       console.log(error);
@@ -168,10 +183,79 @@ const TiPlay = () => "▶";
     }
   };
 
+  // New function to handle video completion
+  const handleVideoEnd = async () => {
+    // Mark progress
+    await addProgress(lecture._id);
+    
+    // Show completion state
+    setIsVideoCompleted(true);
+    setShowCompletionMessage(true);
+    
+    // Check if there's a next lecture
+    const nextIndex = currentLectureIndex + 1;
+    if (nextIndex < lectures.length) {
+      // Start countdown for auto-progress
+      let countdown = 10;
+      setAutoProgressCountdown(countdown);
+      
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        setAutoProgressCountdown(countdown);
+        
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
+          // Auto-progress to next lecture
+          fetchLecture(lectures[nextIndex]._id);
+        }
+      }, 1000);
+      
+      // Store interval ID for cleanup if user manually navigates
+      window.autoProgressInterval = countdownInterval;
+    } else {
+      // Course completed
+      toast.success("🎉 Congratulations! You've completed the entire course!");
+    }
+  };
+
+  // Function to cancel auto-progress
+  const cancelAutoProgress = () => {
+    if (window.autoProgressInterval) {
+      clearInterval(window.autoProgressInterval);
+      setAutoProgressCountdown(0);
+      setShowCompletionMessage(false);
+    }
+  };
+
+  // Function to manually go to next lecture
+  const goToNextLecture = () => {
+    const nextIndex = currentLectureIndex + 1;
+    if (nextIndex < lectures.length) {
+      cancelAutoProgress();
+      fetchLecture(lectures[nextIndex]._id);
+    }
+  };
+
   useEffect(() => {
     fetchLectures();
     fetchProgress();
+    
+    // Cleanup interval on unmount
+    return () => {
+      if (window.autoProgressInterval) {
+        clearInterval(window.autoProgressInterval);
+      }
+    };
   }, []);
+
+  // Cleanup interval when lecture changes
+  useEffect(() => {
+    return () => {
+      if (window.autoProgressInterval) {
+        clearInterval(window.autoProgressInterval);
+      }
+    };
+  }, [lecture._id]);
 
   if (loading) {
     return <Loading />;
@@ -268,6 +352,7 @@ const TiPlay = () => "▶";
           border-radius: 24px;
           padding: 30px;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          position: relative;
         }
 
         .video-player {
@@ -276,12 +361,115 @@ const TiPlay = () => "▶";
           overflow: hidden;
           margin-bottom: 24px;
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+          position: relative;
         }
 
         .video-player video {
           width: 100%;
           height: auto;
           display: block;
+        }
+
+        .video-completion-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 16px;
+          backdrop-filter: blur(10px);
+          animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .completion-content {
+          text-align: center;
+          color: white;
+        }
+
+        .completion-checkmark {
+          font-size: 64px;
+          margin-bottom: 16px;
+          animation: checkmarkPop 0.6s ease;
+        }
+
+        @keyframes checkmarkPop {
+          0% { transform: scale(0); }
+          50% { transform: scale(1.2); }
+          100% { transform: scale(1); }
+        }
+
+        .completion-title {
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+
+        .completion-subtitle {
+          font-size: 16px;
+          opacity: 0.9;
+          margin-bottom: 24px;
+        }
+
+        .auto-progress-notice {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 16px;
+          margin-bottom: 16px;
+          text-align: center;
+        }
+
+        .countdown-timer {
+          font-size: 32px;
+          font-weight: 700;
+          color: #ffffff;
+          margin: 8px 0;
+        }
+
+        .progress-actions {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+        }
+
+        .next-btn, .cancel-btn {
+          padding: 12px 24px;
+          border-radius: 8px;
+          border: none;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .next-btn {
+          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          color: white;
+        }
+
+        .next-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .cancel-btn {
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+        }
+
+        .cancel-btn:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .video-info {
+          position: relative;
         }
 
         .video-info h1 {
@@ -292,6 +480,26 @@ const TiPlay = () => "▶";
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .lecture-completed-badge {
+          background: linear-gradient(135deg, #10b981, #059669);
+          padding: 6px 12px;
+          border-radius: 20px;
+          font-size: 14px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+          from { transform: translateX(20px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
         }
 
         .video-info h3 {
@@ -514,6 +722,23 @@ const TiPlay = () => "▶";
           font-weight: 700;
         }
 
+        .title-checkmark {
+          color: #10b981;
+          margin-left: 8px;
+          animation: checkmarkAppear 0.5s ease;
+        }
+
+        @keyframes checkmarkAppear {
+          from { 
+            opacity: 0; 
+            transform: scale(0.5) rotate(-90deg);
+          }
+          to { 
+            opacity: 1; 
+            transform: scale(1) rotate(0deg);
+          }
+        }
+
         .completed-badge {
           background: linear-gradient(135deg, #10b981, #059669);
           padding: 4px 6px;
@@ -575,6 +800,18 @@ const TiPlay = () => "▶";
           .sidebar {
             padding: 20px;
           }
+
+          .progress-actions {
+            flex-direction: column;
+          }
+
+          .completion-checkmark {
+            font-size: 48px;
+          }
+
+          .completion-title {
+            font-size: 20px;
+          }
         }
       `}</style>
 
@@ -612,11 +849,46 @@ const TiPlay = () => "▶";
                       disablePictureInPicture
                       disableRemotePlayback
                       autoPlay
-                      onEnded={() => addProgress(lecture._id)}
+                      onEnded={handleVideoEnd}
                     />
+                    
+                    {/* Video Completion Overlay */}
+                    {showCompletionMessage && (
+                      <div className="video-completion-overlay">
+                        <div className="completion-content">
+                          <div className="completion-checkmark">✓</div>
+                          <h3 className="completion-title">Lecture Completed!</h3>
+                          <p className="completion-subtitle">Great job finishing this lecture</p>
+                          
+                          {autoProgressCountdown > 0 && currentLectureIndex + 1 < lectures.length && (
+                            <div className="auto-progress-notice">
+                              <p>Next lecture starting in:</p>
+                              <div className="countdown-timer">{autoProgressCountdown}</div>
+                              <p>"{lectures[currentLectureIndex + 1]?.title}"</p>
+                            </div>
+                          )}
+                          
+                          <div className="progress-actions">
+                            {currentLectureIndex + 1 < lectures.length && (
+                              <button className="next-btn" onClick={goToNextLecture}>
+                                Start Next Lecture
+                              </button>
+                            )}
+                            {autoProgressCountdown > 0 && (
+                              <button className="cancel-btn" onClick={cancelAutoProgress}>
+                                Stay Here
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                  
                   <div className="video-info">
-                    <h1>{lecture.title}</h1>
+                    <h1>
+                    {lecture.title}
+                  </h1>
                     <h3>{lecture.description}</h3>
                   </div>
                 </>
@@ -718,7 +990,10 @@ const TiPlay = () => "▶";
               lectures.map((e, i) => (
                 <div key={i}>
                   <div
-                    onClick={() => fetchLecture(e._id)}
+                    onClick={() => {
+                      cancelAutoProgress(); // Cancel any ongoing auto-progress
+                      fetchLecture(e._id);
+                    }}
                     className={`lecture-item ${
                       lecture._id === e._id ? "active" : ""
                     }`}
@@ -728,13 +1003,13 @@ const TiPlay = () => "▶";
                         <span className="lecture-number">{i + 1}</span>
                         <TiPlay size={16} />
                         {e.title}
+                        {progress[0] &&
+                          progress[0].completedLectures.includes(e._id) && (
+                            <span className="title-checkmark">
+                              <TiTick size={16} />
+                            </span>
+                          )}
                       </div>
-                      {progress[0] &&
-                        progress[0].completedLectures.includes(e._id) && (
-                          <div className="completed-badge">
-                            <TiTick size={14} />
-                          </div>
-                        )}
                     </div>
                   </div>
                   {user && user.role === "admin" && (

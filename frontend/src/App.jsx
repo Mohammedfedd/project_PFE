@@ -20,6 +20,7 @@ import RefundCourse from './pages/refundcourse/RefundCourse.jsx';
 import EditUser from './pages/edituser/EditUser.jsx';
 import Lecture from './pages/lecture/Lecture.jsx';
 import CourseStudy from './pages/CourseStudy/CourseStudy.jsx';
+import AdminDashboard from './admin/Dashboard/AdminDashboard.jsx';
 
 
 const App = () => {
@@ -48,6 +49,7 @@ const App = () => {
         <Route path=":id/edit-profile" element={isAuth ? <EditUser user={user} /> : <Login setPageLoading={setPageLoading} />} />
         <Route path="/course/study/:id"element={isAuth ? <CourseStudy user={user} /> : <Login />} />
         <Route path="/lectures/:id" element={isAuth ? <Lecture user={user} /> : <Login />}/>
+        <Route path="/admin/dashboard" element={isAuth ? <AdminDashboard user={user} /> : <Login />}/>
       </Routes>
       <Footer />
     </BrowserRouter>

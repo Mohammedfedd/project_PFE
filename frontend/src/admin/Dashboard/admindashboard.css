@@ -1,0 +1,83 @@
+body, html, #root {
+  height: 100%;
+  margin: 0;
+  background: linear-gradient(135deg, #12121f, #2a2a44);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #e0e0e0;
+}
+
+.admin-dashboard-container {
+  max-width: 1200px;
+  margin: 3rem auto;
+  padding: 2rem 3rem;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.stat-card {
+  background: #f8f9fa; /* light background like your profile card */
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  padding: 2.5rem 2rem;
+  flex: 1 1 300px;
+  max-width: 350px;
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+  cursor: default;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: #2c3e50; /* dark text color */
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.stat-icon {
+  background: #4a69bd; /* your blue gradient colors */
+  color: white;
+  font-size: 3.8rem;
+  padding: 1.3rem;
+  border-radius: 50%;
+  box-shadow: 0 8px 25px rgba(74, 105, 189, 0.4);
+  flex-shrink: 0;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1.2px;
+  color: #4a69bd; /* blue */
+}
+
+.stat-value {
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: #1e3799; /* darker blue */
+  letter-spacing: 1.6px;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .stat-card {
+    max-width: 100%;
+  }
+}

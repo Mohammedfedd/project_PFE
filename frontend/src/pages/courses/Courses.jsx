@@ -4,7 +4,7 @@ import { CourseData } from "../../context/CourseContext";
 import CourseCard from "../../components/coursecard/CourseCard";
 import Loading from "../../components/loading/Loading";
 
-const Courses = () => {
+const Courses = ({ user }) => {
   const { courses, loading, fetchCourses, fetchMyCourse } = CourseData();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -13,10 +13,11 @@ const Courses = () => {
     fetchMyCourse();
   }, []);
 
-  // Filter courses by title based on search term (case insensitive)
-  const filteredCourses = courses.filter((course) =>
-    course.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter courses by title and comingSoon flag (hide if comingSoon and user not admin)
+  const filteredCourses = courses.filter(course => {
+    if (course.comingSoon && user?.role !== "admin") return false;
+    return course.title.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   if (loading) return <Loading />;
 
@@ -27,7 +28,6 @@ const Courses = () => {
         <p>Expand your knowledge with our expertly crafted curriculum</p>
       </div>
 
-      {/* Search bar */}
       <div className="courses-search" style={{ marginBottom: "20px" }}>
         <input
           type="text"

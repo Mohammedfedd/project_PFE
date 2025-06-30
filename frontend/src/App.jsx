@@ -21,6 +21,7 @@ import EditUser from './pages/edituser/EditUser.jsx';
 import Lecture from './pages/lecture/Lecture.jsx';
 import CourseStudy from './pages/CourseStudy/CourseStudy.jsx';
 import AdminDashboard from './admin/Dashboard/AdminDashboard.jsx';
+import AdminCourses from './admin/Courses/AdminCourses.jsx';
 
 
 const App = () => {
@@ -36,7 +37,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home setPageLoading={setPageLoading} />} />
         <Route path="/about" element={<About setPageLoading={setPageLoading} />} />
-        <Route path="/courses" element={<Courses setPageLoading={setPageLoading} />} />
+        <Route path="/courses" element={<Courses user={user} setPageLoading={setPageLoading} />} />
         <Route path="/account" element={isAuth ? <Account user={user} setPageLoading={setPageLoading} /> : <Login setPageLoading={setPageLoading} />} />
         <Route path="/login" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Login setPageLoading={setPageLoading} />} />
         <Route path="/register" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Register setPageLoading={setPageLoading} />} />
@@ -50,6 +51,7 @@ const App = () => {
         <Route path="/course/study/:id"element={isAuth ? <CourseStudy user={user} /> : <Login />} />
         <Route path="/lectures/:id" element={isAuth ? <Lecture user={user} /> : <Login />}/>
         <Route path="/admin/dashboard" element={isAuth ? <AdminDashboard user={user} /> : <Login />}/>
+         <Route path="/admin/course" element={isAuth ? <AdminCourses user={user} /> : <Login />}/>
       </Routes>
       <Footer />
     </BrowserRouter>

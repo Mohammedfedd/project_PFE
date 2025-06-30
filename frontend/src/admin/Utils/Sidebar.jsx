@@ -1,6 +1,6 @@
 import React from "react";
 import "./common.css";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { AiFillHome, AiOutlineLogout } from "react-icons/ai";
 import { FaBook, FaUserAlt, FaChevronLeft } from "react-icons/fa";
 import { UserData } from "../../context/UserContext";
@@ -47,7 +47,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
             <h3>Admin Panel</h3>
           </div>
         )}
-        <button 
+        <button
           className="sidebar-collapse-btn"
           onClick={onToggle}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -58,11 +58,11 @@ const Sidebar = ({ collapsed, onToggle }) => {
 
       <nav className="sidebar-nav">
         <ul className="sidebar-menu">
-          {menuItems.map((item) => (
+          {menuItems.map((item) =>
             item.show && (
               <li key={item.path} className="sidebar-item">
-                <Link 
-                  to={item.path}
+                <a
+                  href={item.path}
                   className={`sidebar-link ${isActive(item.path) ? 'active' : ''}`}
                   title={collapsed ? item.label : ''}
                 >
@@ -70,16 +70,16 @@ const Sidebar = ({ collapsed, onToggle }) => {
                     {item.icon}
                   </div>
                   {!collapsed && <span className="sidebar-text">{item.label}</span>}
-                </Link>
+                </a>
               </li>
             )
-          ))}
+          )}
         </ul>
 
         <div className="sidebar-footer">
           <div className="sidebar-item">
-            <Link 
-              to="/account"
+            <a
+              href="/account"
               className="sidebar-link logout-link"
               onClick={handleLogout}
               title={collapsed ? "Logout" : ''}
@@ -88,7 +88,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
                 <AiOutlineLogout />
               </div>
               {!collapsed && <span className="sidebar-text">Logout</span>}
-            </Link>
+            </a>
           </div>
 
           {!collapsed && user && (

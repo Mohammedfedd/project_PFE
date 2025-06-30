@@ -12,56 +12,54 @@
 
 .course-card {
   position: relative;
-  background: white;
-  border-radius: var(--card-radius);
+  background: #1e1e2f; /* dark bluish-gray */
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
   max-width: 340px;
-  min-height: 540px; /* ✅ Flexible height */
+  min-height: 540px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 1rem;
   margin: 1rem;
-  animation: fadeIn 0.5s ease-out forwards;
+  color: #f1f1f1; /* light text */
 }
 
 .course-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
 }
 
 .course-image {
   width: 100%;
   height: 160px;
   object-fit: cover;
-  border-bottom: 3px solid var(--primary-color);
+  border-bottom: 3px solid #4361ee;
 }
 
 .course-card h3 {
-  color: var(--dark-color);
   font-size: 1.2rem;
-  margin: 0.5rem 0;
   font-weight: 700;
+  margin: 0.5rem 0;
   line-height: 1.4;
   padding: 0 1rem;
+  color: #ffffff;
 }
 
 .course-card p {
-  color: #555;
+  color: #cccccc;
   padding: 0 1rem;
   margin: 0.4rem 0;
   font-size: 1rem;
 }
 
 .course-card p:last-of-type {
-  margin-bottom: 1rem;
-  color: var(--accent-color);
+  color: #f72585;
   font-weight: 600;
 }
 
-/* ✅ Button container to stack properly */
 .btn-group {
   display: flex;
   flex-direction: column;
@@ -70,40 +68,39 @@
   margin-top: auto;
 }
 
-/* ✅ Reusable button style */
 .common-btn {
   cursor: pointer;
-  background: var(--primary-color);
+  background: #4361ee;
   color: white;
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 30px;
   font-weight: 600;
   font-size: 1rem;
-  transition: var(--transition);
+  transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .common-btn:hover {
-  background: var(--secondary-color);
+  background: #3f37c9;
   transform: translateY(-3px);
-  box-shadow: 0 5px 10px rgba(67, 97, 238, 0.3);
+  box-shadow: 0 5px 10px rgba(67, 97, 238, 0.4);
 }
 
 .common-btn:active {
   transform: translateY(0);
 }
 
-/* ✅ Admin Delete button */
 .admin-delete {
   background: #ff3547 !important;
 }
 
 .admin-delete:hover {
   background: #ff0015 !important;
-  box-shadow: 0 5px 10px rgba(255, 53, 71, 0.3);
+  box-shadow: 0 5px 10px rgba(255, 53, 71, 0.4);
 }
+
 
 /* ✅ Refund button */
 .refund-btn {

@@ -1,0 +1,157 @@
+/* admincourses.css */
+
+.admin-courses {
+  display: flex;
+  gap: 40px;
+  padding: 40px;
+  background: #f0f2f5;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.left {
+  flex: 1.5;
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.1);
+  overflow-x: auto;
+}
+
+.left h1 {
+  margin-bottom: 25px;
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 2.6rem;
+  border-bottom: 3px solid #4361ee;
+  padding-bottom: 10px;
+}
+
+.courses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  color: #34495e;
+  min-width: 700px;
+}
+
+.courses-table thead tr {
+  background-color: #4361ee;
+  color: white;
+}
+
+.courses-table th,
+.courses-table td {
+  padding: 12px 18px;
+  text-align: left;
+  border-bottom: 1px solid #e1e4eb;
+  vertical-align: middle;
+}
+
+.courses-table tbody tr:nth-child(even) {
+  background-color: #f7f9fc;
+}
+
+.courses-table tbody tr:hover {
+  background-color: #dbe7ff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.right {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px 35px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.1);
+  max-width: 450px;
+}
+
+.right h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #4361ee;
+  text-align: center;
+}
+
+.add-course-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #34495e;
+  margin-top: 15px;
+}
+
+.add-course-form input[type="text"],
+.add-course-form input[type="number"],
+.add-course-form select,
+.add-course-form input[type="file"] {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  font-size: 1rem;
+  color: #2c3e50;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.add-course-form input[type="file"] {
+  padding: 4px 14px;
+}
+
+.add-course-form input[type="text"]:focus,
+.add-course-form input[type="number"]:focus,
+.add-course-form select:focus,
+.add-course-form input[type="file"]:focus {
+  outline: none;
+  border-color: #4361ee;
+  box-shadow: 0 0 6px rgba(67, 97, 238, 0.5);
+}
+
+.image-preview {
+  display: block;
+  margin: 15px auto;
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgb(67 97 238 / 0.4);
+}
+
+.common-btn {
+  width: 100%;
+  margin-top: 25px;
+  padding: 14px;
+  background-color: #4361ee;
+  border: none;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.common-btn:disabled {
+  background-color: #a0a9f5;
+  cursor: not-allowed;
+}
+
+.common-btn:hover:not(:disabled) {
+  background-color: #3a52d1;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .admin-courses {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .left,
+  .right {
+    max-width: 100%;
+    margin-bottom: 30px;
+  }
+}

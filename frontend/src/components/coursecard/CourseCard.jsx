@@ -30,7 +30,28 @@ const CourseCard = ({ course }) => {
   };
 
   return (
-    <div className="course-card">
+    <div className="course-card" style={{ position: "relative" }}>
+      {course.comingSoon && user?.role === "admin" && (
+        <div
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            backgroundColor: "#d43f8d",
+            color: "white",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontWeight: "700",
+            fontSize: "0.8rem",
+            zIndex: 10,
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        >
+          COMING SOON
+        </div>
+      )}
+
       <img src={`${server}/${course.image}`} alt="" className="course-image" />
       <h3>{course.title}</h3>
       <p>Instructor - {course.createdBy}</p>

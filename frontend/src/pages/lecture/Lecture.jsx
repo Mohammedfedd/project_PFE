@@ -19,6 +19,7 @@ const Lecture = ({ user }) => {
   const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
   
+  
   // New state for auto-progress and completion tracking
   const [currentLectureIndex, setCurrentLectureIndex] = useState(0);
   const [isVideoCompleted, setIsVideoCompleted] = useState(false);

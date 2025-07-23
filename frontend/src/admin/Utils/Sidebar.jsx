@@ -2,7 +2,7 @@ import React from "react";
 import "./common.css";
 import { useLocation } from "react-router-dom";
 import { AiFillHome, AiOutlineLogout } from "react-icons/ai";
-import { FaBook, FaUserAlt, FaChevronLeft } from "react-icons/fa";
+import { FaBook, FaUserAlt, FaChevronLeft, FaTags } from "react-icons/fa"; // Added FaTags icon
 import { UserData } from "../../context/UserContext";
 
 const Sidebar = ({ collapsed, onToggle }) => {
@@ -18,20 +18,32 @@ const Sidebar = ({ collapsed, onToggle }) => {
       path: "/admin/dashboard",
       icon: <AiFillHome />,
       label: "Dashboard",
-      show: true
+      show: true,
     },
     {
       path: "/admin/course",
       icon: <FaBook />,
       label: "Courses",
-      show: true
+      show: true,
+    },
+    {
+      path: "/admin/category",     
+      icon: <FaTags />,
+      label: "Categories",
+      show: !!user,
     },
     {
       path: "/admin/users",
       icon: <FaUserAlt />,
       label: "Users",
-      show: !!user
-    }
+      show: !!user,
+    },
+    {
+      path: "/admin/sales",
+      icon: <FaUserAlt />,
+      label: "Sales",
+      show: !!user,
+    },
   ];
 
   const handleLogout = () => {
@@ -40,7 +52,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
   };
 
   return (
-    <div className={`sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
+    <div className={`sidebar ${collapsed ? "sidebar-collapsed" : ""}`}>
       <div className="sidebar-header">
         {!collapsed && (
           <div className="sidebar-brand">
@@ -52,27 +64,30 @@ const Sidebar = ({ collapsed, onToggle }) => {
           onClick={onToggle}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <FaChevronLeft className={collapsed ? 'rotate-180' : ''} />
+          <FaChevronLeft className={collapsed ? "rotate-180" : ""} />
         </button>
       </div>
 
       <nav className="sidebar-nav">
         <ul className="sidebar-menu">
-          {menuItems.map((item) =>
-            item.show && (
-              <li key={item.path} className="sidebar-item">
-                <a
-                  href={item.path}
-                  className={`sidebar-link ${isActive(item.path) ? 'active' : ''}`}
-                  title={collapsed ? item.label : ''}
-                >
-                  <div className="sidebar-icon">
-                    {item.icon}
-                  </div>
-                  {!collapsed && <span className="sidebar-text">{item.label}</span>}
-                </a>
-              </li>
-            )
+          {menuItems.map(
+            (item) =>
+              item.show && (
+                <li key={item.path} className="sidebar-item">
+                  <a
+                    href={item.path}
+                    className={`sidebar-link ${
+                      isActive(item.path) ? "active" : ""
+                    }`}
+                    title={collapsed ? item.label : ""}
+                  >
+                    <div className="sidebar-icon">{item.icon}</div>
+                    {!collapsed && (
+                      <span className="sidebar-text">{item.label}</span>
+                    )}
+                  </a>
+                </li>
+              )
           )}
         </ul>
 
@@ -82,7 +97,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
               href="/account"
               className="sidebar-link logout-link"
               onClick={handleLogout}
-              title={collapsed ? "Logout" : ''}
+              title={collapsed ? "Logout" : ""}
             >
               <div className="sidebar-icon">
                 <AiOutlineLogout />
@@ -94,7 +109,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
           {!collapsed && user && (
             <div className="sidebar-user">
               <div className="user-info">
-                <span className="user-name">{user.name || 'Admin'}</span>
+                <span className="user-name">{user.name || "Admin"}</span>
                 <span className="user-role">Administrator</span>
               </div>
             </div>

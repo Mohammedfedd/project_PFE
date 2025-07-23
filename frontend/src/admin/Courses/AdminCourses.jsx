@@ -7,14 +7,6 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { server } from "../../main";
 
-const categories = [
-  "Web Development",
-  "App Development",
-  "Game Development",
-  "Data Science",
-  "Artificial Intelligence",
-];
-
 const AdminCourses = ({ user }) => {
   const navigate = useNavigate();
 
@@ -32,8 +24,24 @@ const AdminCourses = ({ user }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const { courses, fetchCourses } = CourseData();
 
+  // New state for categories fetched from backend
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories from backend
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get(`${server}/api/categories`, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      setCategories(Array.isArray(data.categories) ? data.categories : []);
+    } catch (error) {
+      toast.error("Failed to load categories");
+    }
+  };
+
   useEffect(() => {
     fetchCourses();
+    fetchCategories();  // fetch categories on mount
   }, []);
 
   const changeImageHandler = (e) => {
@@ -141,7 +149,7 @@ const AdminCourses = ({ user }) => {
                   <th>Category</th>
                   <th>Price</th>
                   <th>Created By</th>
-                  <th>Duration (hours)</th>
+                  <th>Duration (weeks)</th>
                   <th>Coming Soon</th>
                   <th>Actions</th>
                 </tr>
@@ -237,8 +245,8 @@ const AdminCourses = ({ user }) => {
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
+                  <option key={cat._id} value={cat.name}>
+                    {cat.name}
                   </option>
                 ))}
               </select>
@@ -258,7 +266,7 @@ const AdminCourses = ({ user }) => {
                 onChange={(e) => setCreatedBy(e.target.value)}
                 required
               />
-              <label htmlFor="duration">Duration (hours)</label>
+              <label htmlFor="duration">Duration (weeks)</label>
               <input
                 type="number"
                 id="duration"

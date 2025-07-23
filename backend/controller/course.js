@@ -214,7 +214,7 @@ export const refundCourse = TryCatch(async (req, res) => {
   payment.status = "refunded";
   await payment.save();
 
-    await sendRefundMail({
+  await sendRefundMail({
     firstName: user.firstName || "User",
     lastName: user.lastName || "",
     email: user.email,
@@ -222,13 +222,13 @@ export const refundCourse = TryCatch(async (req, res) => {
     amount: payment.amount,
   });
 
- await sendAdminRefundMail({
-  firstName: user.firstName || "User",
-  lastName: user.lastName || "",
-  email: user.email,
-  courseTitle: course.title,
-  paymentIntentId: payment.stripe_payment_intent_id,
-});
+  await sendAdminRefundMail({
+    firstName: user.firstName || "User",
+    lastName: user.lastName || "",
+    email: user.email,
+    courseTitle: course.title,
+    paymentIntentId: payment.stripe_payment_intent_id,
+  });
 
   res.status(200).json({ message: "Refund processed successfully" });
 });

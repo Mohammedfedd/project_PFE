@@ -1,0 +1,121 @@
+.users {
+  padding: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #000; /* Black text */
+}
+
+.users h1 {
+  color: #000; /* Black text */
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+}
+
+.users table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  color: #000; /* Black text */
+}
+
+.users thead {
+  background-color: #3498db;
+  color: white;
+}
+
+.users th, 
+.users td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  color: #000; /* Black text */
+}
+
+.users th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.users tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.users tbody tr:hover {
+  background-color: #e3f2fd;
+}
+
+.role-select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  color: #000; /* Black text */
+}
+
+.common-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  border: none;
+  color: #000; /* Black text */
+}
+
+.edit-btn {
+  background-color: #3498db;
+  color: white;
+}
+
+.save-btn {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.common-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.common-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .users {
+    padding: 1rem;
+  }
+  
+  .users table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .users th, 
+  .users td {
+    padding: 0.75rem;
+  }
+}
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}

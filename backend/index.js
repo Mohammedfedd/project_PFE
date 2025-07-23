@@ -23,6 +23,8 @@ app.use(cors({
 app.use("/api", userRoutes);
 app.use("/api", courseRoutes);
 app.use("/api", adminRoutes);
+app.use('/api', QuizRoutes);
+
 
 const port = process.env.PORT || 5000;
 
@@ -36,10 +38,13 @@ app.use("/uploads", express.static("uploads"));
 import userRoutes from "./routes/user.js";
 import courseRoutes from "./routes/course.js";
 import adminRoutes from "./routes/admin.js";
+import QuizRoutes from "./routes/QuizRoutes.js"
 
 app.use("/api", userRoutes);
 app.use("/api", courseRoutes);
 app.use("/api", adminRoutes);
+app.use('/api', QuizRoutes);
+
 
 // Optional test endpoint for Stripe
 app.post("/api/create-payment-intent", async (req, res) => {

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "../Utils/Layout.jsx";
 import axios from "axios";
 import { server } from "../../main";
-import { FaBook, FaChalkboardTeacher, FaUsers } from "react-icons/fa";
+import { FaBook, FaChalkboardTeacher, FaUsers, FaQuestionCircle } from "react-icons/fa";
 import "./admindashboard.css";
 
 const AdminDashbord = ({ user }) => {
@@ -65,6 +65,16 @@ const AdminDashbord = ({ user }) => {
             <div className="stat-info">
               <p className="stat-label">Total Users</p>
               <p className="stat-value">{stats.totalUsers ?? 0}</p>
+            </div>
+          </div>
+
+          <div className="stat-card total-quizzes">
+            <div className="stat-icon">
+              <FaQuestionCircle />
+            </div>
+            <div className="stat-info">
+              <p className="stat-label">Total Quizzes</p>
+              <p className="stat-value">{stats.totalQuizzes ?? 0}</p>
             </div>
           </div>
         </div>

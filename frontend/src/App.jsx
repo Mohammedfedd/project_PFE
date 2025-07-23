@@ -22,6 +22,9 @@ import Lecture from './pages/lecture/Lecture.jsx';
 import CourseStudy from './pages/CourseStudy/CourseStudy.jsx';
 import AdminDashboard from './admin/Dashboard/AdminDashboard.jsx';
 import AdminCourses from './admin/Courses/AdminCourses.jsx';
+import AdminUsers from './admin/Users/AdminUsers.jsx';
+import AdminCategory from './admin/Category/AdminCategory.jsx';
+import AdminSales from './admin/Sales/AdminSales.jsx';
 
 
 const App = () => {
@@ -51,7 +54,10 @@ const App = () => {
         <Route path="/course/study/:id"element={isAuth ? <CourseStudy user={user} /> : <Login />} />
         <Route path="/lectures/:id" element={isAuth ? <Lecture user={user} /> : <Login />}/>
         <Route path="/admin/dashboard" element={isAuth ? <AdminDashboard user={user} /> : <Login />}/>
-         <Route path="/admin/course" element={isAuth ? <AdminCourses user={user} /> : <Login />}/>
+        <Route path="/admin/course" element={isAuth ? <AdminCourses user={user} /> : <Login />}/>
+        <Route path="/admin/users" element={isAuth ? <AdminUsers user={user} /> : <Login />}/>
+        <Route path="/admin/category" element={isAuth ? <AdminCategory user={user} /> : <Login />}/>
+        <Route path="/admin/sales" element={isAuth ? <AdminSales user={user} /> : <Login />}/>
       </Routes>
       <Footer />
     </BrowserRouter>

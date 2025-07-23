@@ -7,7 +7,7 @@ import {
   getMyCourses,
   getSingleCourse,
   paymentVerification,
-  refundCourse  // <-- Import refundCourse controller
+  refundCourse ,
 } from '../controller/course.js';
 import { isAuth } from '../middlewares/isAuth.js';
 

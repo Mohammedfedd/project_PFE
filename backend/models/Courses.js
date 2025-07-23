@@ -37,6 +37,24 @@ const schema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  content: [
+    {
+      type: {
+        type: String,
+        enum: ["lecture", "quiz"],
+        required: true,
+      },
+      lectureId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Lecture",
+      },
+      quizId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quiz",
+      },
+    },
+  ],
 });
 
 export const Courses = mongoose.model("Courses", schema);

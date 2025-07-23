@@ -5,7 +5,77 @@
   color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 2rem;
-  box-sizing: border-box; /* Add this to prevent padding from affecting width */
+  box-sizing: border-box; /* Prevent padding from affecting width */
+}
+
+/* === PROGRESS HEADER === */
+.progress-header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 24px;
+  margin: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* === PROGRESS STATS === */
+.progress-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.progress-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.progress-percentage {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === PROGRESS BAR FIXES === */
+.progress-bar-container {
+  position: relative;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%; /* Ensure full width */
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+  border-radius: 10px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  width: 0; /* Start at 0, will be set by JS */
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* === MAIN LAYOUT STRUCTURE === */
@@ -28,6 +98,182 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   height: fit-content;
   min-height: 500px; /* Ensure consistent height */
+  position: relative;
+}
+
+/* === VIDEO PLAYER === */
+.video-player {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.video-player video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* === VIDEO COMPLETION OVERLAY === */
+.video-completion-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.5s ease;
+  z-index: 10;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.completion-content {
+  text-align: center;
+  color: white;
+}
+
+.completion-checkmark {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: checkmarkPop 0.6s ease;
+}
+
+@keyframes checkmarkPop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.completion-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.completion-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-bottom: 24px;
+}
+
+.auto-progress-notice {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.countdown-timer {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 8px 0;
+}
+
+.progress-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.next-btn, .cancel-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.next-btn {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* === VIDEO INFO === */
+.video-info {
+  position: relative;
+}
+
+.video-info h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(45deg, #ffffff, #e0e0e0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lecture-completed-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.video-info h3 {
+  font-size: 16px;
+  font-weight: 400;
+  color: #b0b0b0;
+  line-height: 1.6;
+}
+
+/* === NO VIDEO / NO LECTURES PLACEHOLDERS === */
+.no-video, .no-lectures {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.no-video-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.5;
 }
 
 /* === SIDEBAR === */
@@ -45,23 +291,243 @@
   top: 20px;
 }
 
-/* === PROGRESS BAR FIXES === */
-.progress-bar-container {
-  position: relative;
-  height: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  overflow: hidden;
-  width: 100%; /* Ensure full width */
+/* === SCROLLBAR STYLING === */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
 }
 
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
-  border-radius: 10px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+/* === ADMIN CONTROLS === */
+.admin-controls {
+  margin-bottom: 24px;
+}
+
+.add-lecture-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-lecture-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+/* === LECTURE FORM === */
+.lecture-form {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lecture-form h2 {
+  margin-bottom: 20px;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #e0e0e0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #ffffff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.file-input {
   position: relative;
-  width: 0; /* Start at 0, will be set by JS */
+  overflow: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-input input[type=file] {
+  position: absolute;
+  left: -9999px;
+}
+
+.file-input-label {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.file-input-label:hover {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.video-preview {
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* === LECTURES LIST === */
+.lectures-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lecture-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.lecture-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.lecture-item.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+  border-color: #6366f1;
+}
+
+.lecture-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.lecture-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lecture-number {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.title-checkmark {
+  color: #10b981;
+  margin-left: 8px;
+  animation: checkmarkAppear 0.5s ease;
+}
+
+@keyframes checkmarkAppear {
+  from { 
+    opacity: 0; 
+    transform: scale(0.5) rotate(-90deg);
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.completed-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 4px 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 /* === RESPONSIVE FIXES === */
@@ -95,35 +561,57 @@
   .sidebar {
     padding: 20px;
   }
+  
+  .lecture-main {
+    gap: 20px;
+  }
+}
+.quiz-question {
+  margin-bottom: 20px;
 }
 
-/* === SCROLLBAR STYLING === */
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 3px;
-}
-
-/* === CONTENT PLACEHOLDERS === */
-.no-video, .no-lectures {
+.options-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 40px 20px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.no-video-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-  opacity: 0.5;
+.option-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
 }
+
+.option-card:hover {
+  background-color: #f0f0f0;
+}
+
+.option-card.selected {
+  background-color: #d1e7dd;
+  border-color: #0f5132;
+  font-weight: bold;
+}
+
+.submit-btn {
+  margin-top: 20px;
+  padding: 10px 16px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.feedback.correct {
+  color: green;
+  margin-top: 10px;
+}
+
+.feedback.incorrect {
+  color: red;
+  margin-top: 10px;
+}
+

@@ -6,17 +6,42 @@ import {
   deleteCourse,
   deleteLecture,
   getAllStats,
-  toggleComingSoon, 
+  toggleComingSoon,
+  getAllUser,
+  updateRole,
+  deleteUser,
+  createCategory,
+  getAllCategories,
+  updateCategory,
+  deleteCategory,
+  getTotalSales,
+  getDailySales ,
 } from '../controller/admin.js';
+import { addQuiz, deleteQuiz } from '../controller/QuizController.js';
 import { uploadFiles } from '../middlewares/multer.js';
 
 const router = express.Router();
 
+// Course Management
 router.post('/course/new', isAuth, isAdmin, uploadFiles, createCourse);
 router.post('/course/:id', isAuth, isAdmin, uploadFiles, addLectures);
 router.delete('/course/:id', isAuth, isAdmin, deleteCourse);
-router.delete('/lecture/:id', isAuth, isAdmin, deleteLecture);
-router.get('/stats', isAuth, isAdmin, getAllStats);
 router.put('/course/:id/toggle-coming-soon', isAuth, isAdmin, toggleComingSoon);
+router.delete('/lecture/:id', isAuth, isAdmin, deleteLecture);
+
+// Admin Stats & Users
+router.get('/stats', isAuth, isAdmin, getAllStats);
+router.get('/sales/total', isAuth, isAdmin, getTotalSales); 
+router.get('/sales/by-date', isAuth, isAdmin, getDailySales); 
+router.get('/users', isAuth, isAdmin, getAllUser);
+router.put('/user/:id', isAuth, updateRole);
+router.delete('/user/:id', isAuth, isAdmin, deleteUser);
+
+// Category Management
+router.post('/category', isAuth, isAdmin, createCategory);
+router.get('/categories', isAuth, isAdmin, getAllCategories);
+router.put('/category/:id', isAuth, isAdmin, updateCategory);
+router.delete('/category/:id', isAuth, isAdmin, deleteCategory);
 
 export default router;
+

@@ -8,7 +8,7 @@ import { User } from "../models/User.js";
 import { Category } from "../models/Category.js";
 import { Quiz } from "../models/Quiz.js";
 import { Payment } from "../models/Payment.js";
-
+import { Educator } from "../models/Educator.js";
 
 const unlinkAsync = promisify(fs.unlink);
 
@@ -90,8 +90,7 @@ export const getAllStats = TryCatch(async (req, res) => {
   const totalCourses = await Courses.countDocuments();
   const totalLectures = await Lecture.countDocuments();
   const totalUsers = await User.countDocuments();
-    const totalQuizzes = await Quiz.countDocuments();
-
+  const totalQuizzes = await Quiz.countDocuments();
 
   const stats = {
     totalCourses,
@@ -113,6 +112,7 @@ export const getTotalSales = TryCatch(async (req, res) => {
 
   res.json({ totalSales });
 });
+
 export const getDailySales = TryCatch(async (req, res) => {
   const dailySales = await Payment.aggregate([
     { $match: { status: "paid" } }, 
@@ -127,6 +127,7 @@ export const getDailySales = TryCatch(async (req, res) => {
 
   res.json({ dailySales }); 
 });
+
 export const toggleComingSoon = TryCatch(async (req, res) => {
   const course = await Courses.findById(req.params.id);
   if (!course) return res.status(404).json({ message: "Course not found" });
@@ -147,39 +148,54 @@ export const getAllUser = TryCatch(async (req, res) => {
 });
 
 export const updateRole = TryCatch(async (req, res) => {
-  if (req.user.mainrole !== "admin")
+  // Allow both admins and superadmins to update roles
+  if (req.user.role !== "superadmin")
     return res.status(403).json({
-      message: "This endpoint is assign to superadmin",
+      message: "Access denied: Only admins and superadmins can update roles",
     });
-  const user = await User.findById(req.params.id);
 
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // Prevent changing role of superadmin(s)
+  if (user.role === "superadmin") {
+    return res.status(403).json({
+      message: "You cannot change the role of a superadmin",
+    });
+  }
+
+  // Toggle between 'user' and 'admin' roles only
   if (user.role === "user") {
     user.role = "admin";
     await user.save();
-
-    return res.status(200).json({
-      message: "Role updated to admin",
-    });
+    return res.status(200).json({ message: "Role updated to admin" });
   }
 
   if (user.role === "admin") {
     user.role = "user";
     await user.save();
-
-    return res.status(200).json({
-      message: "Role updated",
-    });
+    return res.status(200).json({ message: "Role updated to user" });
   }
+
+  return res.status(400).json({ message: "Invalid role change attempted" });
 });
 
 export const deleteUser = TryCatch(async (req, res) => {
-  if (req.user.mainrole !== "admin") {
-    return res.status(403).json({ message: "Only admins can delete users" });
+  // Allow both admins and superadmins to delete users
+  if (req.user.role !== "superadmin") {
+    return res.status(403).json({ message: "Only admins and superadmins can delete users" });
   }
 
   const user = await User.findById(req.params.id);
   if (!user) {
     return res.status(404).json({ message: "User not found" });
+  }
+
+  // Prevent deleting superadmin(s)
+  if (user.role === "superadmin") {
+    return res.status(403).json({ message: "You cannot delete a superadmin" });
   }
 
   await user.deleteOne();
@@ -227,4 +243,57 @@ export const deleteCategory = TryCatch(async (req, res) => {
   await category.deleteOne();
 
   res.json({ message: "Category deleted successfully" });
+});
+
+export const createEducator = TryCatch(async (req, res) => {
+  const { firstName, lastName, email, phone, password, profilePicture } = req.body;
+
+  const existing = await Educator.findOne({ email });
+  if (existing) return res.status(409).json({ message: "Educator already exists" });
+
+  await Educator.create({
+    firstName,
+    lastName,
+    email,
+    phone,
+    password,
+    profilePicture: profilePicture || "",
+  });
+
+  res.status(201).json({ message: "Educator created successfully" });
+});
+
+export const getAllEducators = TryCatch(async (req, res) => {
+  const educators = await Educator.find().select("-password");
+  res.json({ educators });
+});
+
+export const updateEducator = TryCatch(async (req, res) => {
+  const educator = await Educator.findById(req.params.id);
+  if (!educator) return res.status(404).json({ message: "Educator not found" });
+
+  const { firstName, lastName, email, phone, password, profilePicture } = req.body;
+  if (profilePicture) {
+    educator.profilePicture = profilePicture; 
+  }
+  if (firstName) educator.firstName = firstName;
+  if (lastName) educator.lastName = lastName;
+  if (email) educator.email = email;
+  if (phone) educator.phone = phone;
+  if (password) educator.password = password;
+
+  await educator.save();
+  res.json({ message: "Educator updated", educator });
+});
+
+export const deleteEducator = TryCatch(async (req, res) => {
+  const educator = await Educator.findById(req.params.id);
+  if (!educator) return res.status(404).json({ message: "Educator not found" });
+
+  if (educator.profilePicture) {
+    rm(educator.profilePicture, () => console.log("Educator picture deleted"));
+  }
+
+  await educator.deleteOne();
+  res.json({ message: "Educator deleted successfully" });
 });

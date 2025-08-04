@@ -10,7 +10,10 @@ import { server } from "../../main";
 const AdminCourses = ({ user }) => {
   const navigate = useNavigate();
 
-  if (user && user.role !== "admin") return navigate("/");
+  if (user && !["admin", "superadmin"].includes(user.role)) {
+  return navigate("/");
+}
+
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -22,12 +25,25 @@ const AdminCourses = ({ user }) => {
   const [imagePrev, setImagePrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [comingSoon, setComingSoon] = useState("false");
+
   const { courses, fetchCourses } = CourseData();
 
-  // New state for categories fetched from backend
   const [categories, setCategories] = useState([]);
+  const [educators, setEducators] = useState([]);
 
-  // Fetch categories from backend
+  // Fetch educators for dropdown
+  const fetchEducators = async () => {
+    try {
+      const { data } = await axios.get(`${server}/api/educators`, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      setEducators(Array.isArray(data.educators) ? data.educators : []);
+    } catch (error) {
+      toast.error("Failed to load educators");
+    }
+  };
+
   const fetchCategories = async () => {
     try {
       const { data } = await axios.get(`${server}/api/categories`, {
@@ -41,7 +57,8 @@ const AdminCourses = ({ user }) => {
 
   useEffect(() => {
     fetchCourses();
-    fetchCategories();  // fetch categories on mount
+    fetchCategories();
+    fetchEducators();
   }, []);
 
   const changeImageHandler = (e) => {
@@ -63,9 +80,10 @@ const AdminCourses = ({ user }) => {
     myForm.append("description", description);
     myForm.append("category", category);
     myForm.append("price", price);
-    myForm.append("createdBy", createdBy);
+    myForm.append("createdBy", createdBy); // this will be educator id or name
     myForm.append("duration", duration);
     myForm.append("file", image);
+    myForm.append("comingSoon", comingSoon === "true");
 
     try {
       const { data } = await axios.post(`${server}/api/course/new`, myForm, {
@@ -83,6 +101,7 @@ const AdminCourses = ({ user }) => {
       setPrice("");
       setCategory("");
       setSearchTerm("");
+      setComingSoon("false");
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
       setBtnLoading(false);
@@ -148,7 +167,7 @@ const AdminCourses = ({ user }) => {
                   <th>Description</th>
                   <th>Category</th>
                   <th>Price</th>
-                  <th>Created By</th>
+                  <th>Educated By</th> {/* Changed title here */}
                   <th>Duration (weeks)</th>
                   <th>Coming Soon</th>
                   <th>Actions</th>
@@ -161,7 +180,7 @@ const AdminCourses = ({ user }) => {
                     <td>{course.description}</td>
                     <td>{course.category}</td>
                     <td>{course.price}</td>
-                    <td>{course.createdBy}</td>
+                    <td>{course.createdBy}</td> {/* You might want to replace this with educator name if stored differently */}
                     <td>{course.duration}</td>
                     <td>
                       <button
@@ -258,14 +277,20 @@ const AdminCourses = ({ user }) => {
                 onChange={(e) => setPrice(e.target.value)}
                 required
               />
-              <label htmlFor="createdBy">Created By</label>
-              <input
-                type="text"
+              <label htmlFor="createdBy">Educated By</label>
+              <select
                 id="createdBy"
                 value={createdBy}
                 onChange={(e) => setCreatedBy(e.target.value)}
                 required
-              />
+              >
+                <option value="">Select Educator</option>
+                {educators.map((educator) => (
+                  <option key={educator._id} value={educator.firstName + " " + educator.lastName}>
+                    {educator.firstName} {educator.lastName}
+                  </option>
+                ))}
+              </select>
               <label htmlFor="duration">Duration (weeks)</label>
               <input
                 type="number"
@@ -274,6 +299,16 @@ const AdminCourses = ({ user }) => {
                 onChange={(e) => setDuration(e.target.value)}
                 required
               />
+              <label htmlFor="comingSoon">Coming Soon</label>
+              <select
+                id="comingSoon"
+                value={comingSoon}
+                onChange={(e) => setComingSoon(e.target.value)}
+                required
+              >
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
               <label htmlFor="file">Course Image</label>
               <input
                 type="file"

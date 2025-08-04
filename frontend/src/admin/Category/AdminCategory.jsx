@@ -72,6 +72,25 @@ const AdminCategory = () => {
     }
   };
 
+  const deleteCategory = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
+
+    try {
+      await axios.delete(`${server}/api/category/${id}`, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      toast.success("Category deleted");
+      // If deleting currently editing category, reset edit state
+      if (editingId === id) {
+        setEditingId(null);
+        setEditingName("");
+      }
+      fetchCategories();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error deleting category");
+    }
+  };
+
   return (
     <Layout>
       <div className="category-container">
@@ -135,12 +154,21 @@ const AdminCategory = () => {
                         </button>
                       </>
                     ) : (
-                      <button
-                        onClick={() => startEdit(cat._id, cat.name)}
-                        className="btn btn-edit"
-                      >
-                        Edit
-                      </button>
+                      <>
+                        <button
+                          onClick={() => startEdit(cat._id, cat.name)}
+                          className="btn btn-edit"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteCategory(cat._id)}
+                          className="btn btn-delete"
+                          style={{ marginLeft: "8px" }}
+                        >
+                          Delete
+                        </button>
+                      </>
                     )}
                   </td>
                 </tr>

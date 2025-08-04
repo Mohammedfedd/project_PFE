@@ -6,7 +6,7 @@ import { UserData } from "../../context/UserContext";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
-import { FiEdit } from "react-icons/fi"; // Icon for edit
+import { FiEdit } from "react-icons/fi";
 
 const Account = ({ user }) => {
   const { setIsAuth, setUser } = UserData();
@@ -29,12 +29,10 @@ const Account = ({ user }) => {
     window.location.href = `/${user._id}/dashboard`;
   };
 
-  // Edited to force full browser reload
   const editProfileHandler = () => {
     window.location.href = `/${user._id}/edit-profile`;
   };
 
-  // Force full page reload for admin dashboard
   const adminDashboardHandler = () => {
     window.location.href = "/admin/dashboard";
   };
@@ -77,7 +75,7 @@ const Account = ({ user }) => {
                 Dashboard
               </button>
 
-              {user.role === "admin" && (
+              {(user.role === "admin" || user.role === "superadmin") && (
                 <button
                   onClick={adminDashboardHandler}
                   className="dashboard-btn"

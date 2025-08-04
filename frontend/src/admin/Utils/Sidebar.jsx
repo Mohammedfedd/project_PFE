@@ -2,7 +2,14 @@ import React from "react";
 import "./common.css";
 import { useLocation } from "react-router-dom";
 import { AiFillHome, AiOutlineLogout } from "react-icons/ai";
-import { FaBook, FaUserAlt, FaChevronLeft, FaTags } from "react-icons/fa"; // Added FaTags icon
+import {
+  FaBook,
+  FaUserAlt,
+  FaChevronLeft,
+  FaTags,
+  FaChalkboardTeacher,
+  FaChartLine,
+} from "react-icons/fa"; // Added FaTags icon
 import { UserData } from "../../context/UserContext";
 
 const Sidebar = ({ collapsed, onToggle }) => {
@@ -27,7 +34,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
       show: true,
     },
     {
-      path: "/admin/category",     
+      path: "/admin/category",
       icon: <FaTags />,
       label: "Categories",
       show: !!user,
@@ -36,11 +43,18 @@ const Sidebar = ({ collapsed, onToggle }) => {
       path: "/admin/users",
       icon: <FaUserAlt />,
       label: "Users",
+      // Only show this menu item if user is superadmin
+      show: user?.role === "superadmin",
+    },
+    {
+      path: "/admin/educators",
+      icon: <FaChalkboardTeacher />,
+      label: "Educators",
       show: !!user,
     },
     {
       path: "/admin/sales",
-      icon: <FaUserAlt />,
+      icon: <FaChartLine />,
       label: "Sales",
       show: !!user,
     },

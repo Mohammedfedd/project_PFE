@@ -9,10 +9,10 @@ import "./admindashboard.css";
 const AdminDashbord = ({ user }) => {
   const navigate = useNavigate();
 
-  if (user && user.role !== "admin") {
-    navigate("/");
-    return null;
-  }
+  if (user && !["admin", "superadmin"].includes(user.role)) {
+  navigate("/");
+  return null;
+}
 
   const [stats, setStats] = useState({});
 

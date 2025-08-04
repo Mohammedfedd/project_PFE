@@ -41,9 +41,9 @@ const AdminSales = ({ user }) => {
     fetchSalesByDate();
   }, []);
 
-  if (user && user.role !== "admin") {
-    return <p>Access Denied</p>;
-  }
+ if (user && !["admin", "superadmin"].includes(user.role)) {
+  return <p>Access Denied</p>;
+}
 
   // Constants for SVG size
   const width = 600;

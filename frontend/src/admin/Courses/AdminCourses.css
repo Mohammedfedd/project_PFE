@@ -155,3 +155,6 @@
     margin-bottom: 30px;
   }
 }
+#createdBy {
+  color: #000 !important; /* black text */
+}

@@ -15,7 +15,11 @@ import {
   updateCategory,
   deleteCategory,
   getTotalSales,
-  getDailySales ,
+  getDailySales,
+  createEducator,
+  getAllEducators,
+  updateEducator,
+  deleteEducator,
 } from '../controller/admin.js';
 import { addQuiz, deleteQuiz } from '../controller/QuizController.js';
 import { uploadFiles } from '../middlewares/multer.js';
@@ -31,8 +35,8 @@ router.delete('/lecture/:id', isAuth, isAdmin, deleteLecture);
 
 // Admin Stats & Users
 router.get('/stats', isAuth, isAdmin, getAllStats);
-router.get('/sales/total', isAuth, isAdmin, getTotalSales); 
-router.get('/sales/by-date', isAuth, isAdmin, getDailySales); 
+router.get('/sales/total', isAuth, isAdmin, getTotalSales);
+router.get('/sales/by-date', isAuth, isAdmin, getDailySales);
 router.get('/users', isAuth, isAdmin, getAllUser);
 router.put('/user/:id', isAuth, updateRole);
 router.delete('/user/:id', isAuth, isAdmin, deleteUser);
@@ -43,5 +47,10 @@ router.get('/categories', isAuth, isAdmin, getAllCategories);
 router.put('/category/:id', isAuth, isAdmin, updateCategory);
 router.delete('/category/:id', isAuth, isAdmin, deleteCategory);
 
-export default router;
+// Educator Management
+router.post('/educator', isAuth, isAdmin, createEducator);
+router.get('/educators', isAuth, getAllEducators);
+router.put('/educator/:id', isAuth, isAdmin, updateEducator);
+router.delete('/educator/:id', isAuth, isAdmin, deleteEducator);
 
+export default router;

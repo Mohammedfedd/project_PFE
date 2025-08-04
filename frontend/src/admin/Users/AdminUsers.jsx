@@ -9,7 +9,11 @@ import toast from "react-hot-toast";
 const AdminUsers = ({ user }) => {
   const navigate = useNavigate();
 
-  if (user && user.role !== "admin") return navigate("/");
+  // Restrict access: only allow users with role "admin" or "superadmin" to access this page
+  if (user && user.role !== "admin" && user.role !== "superadmin") {
+    navigate("/");
+    return null; // prevent rendering while redirecting
+  }
 
   const [users, setUsers] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -65,7 +69,7 @@ const AdminUsers = ({ user }) => {
       setSelectedRole("");
       fetchUsers();
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Failed to update role");
     }
   };
 
@@ -104,62 +108,64 @@ const AdminUsers = ({ user }) => {
           </thead>
           <tbody>
             {users &&
-              users.map((e, i) => (
-                <tr key={e._id}>
-                  <td>{i + 1}</td>
-                  <td>{e.firstName}</td>
-                  <td>{e.lastName}</td>
-                  <td>{e.email}</td>
-                  <td>
-                    {editingId === e._id ? (
-                      <select
-                        value={selectedRole}
-                        onChange={(e) => setSelectedRole(e.target.value)}
-                        className="role-select"
-                      >
-                        <option value="user">User</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    ) : (
-                      e.role
-                    )}
-                  </td>
-                  <td>
-                    {editingId === e._id ? (
-                      <>
-                        <button
-                          onClick={() => updateRole(e._id)}
-                          className="common-btn save-btn"
+              users
+                .filter((u) => u.role !== "superadmin") // Exclude superadmin users here
+                .map((e, i) => (
+                  <tr key={e._id}>
+                    <td>{i + 1}</td>
+                    <td>{e.firstName}</td>
+                    <td>{e.lastName}</td>
+                    <td>{e.email}</td>
+                    <td>
+                      {editingId === e._id ? (
+                        <select
+                          value={selectedRole}
+                          onChange={(e) => setSelectedRole(e.target.value)}
+                          className="role-select"
                         >
-                          Save
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="common-btn cancel-btn"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => startEdit(e._id, e.role)}
-                          className="common-btn edit-btn"
-                        >
-                          Edit Role
-                        </button>
-                        <button
-                          onClick={() => deleteUser(e._id)}
-                          className="common-btn delete-btn"
-                          style={{ marginLeft: "8px", backgroundColor: "#e74c3c", color: "#fff" }}
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                          <option value="user">User</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      ) : (
+                        e.role
+                      )}
+                    </td>
+                    <td>
+                      {editingId === e._id ? (
+                        <>
+                          <button
+                            onClick={() => updateRole(e._id)}
+                            className="common-btn save-btn"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="common-btn cancel-btn"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => startEdit(e._id, e.role)}
+                            className="common-btn edit-btn"
+                          >
+                            Edit Role
+                          </button>
+                          <button
+                            onClick={() => deleteUser(e._id)}
+                            className="common-btn delete-btn"
+                            style={{ marginLeft: "8px", backgroundColor: "#e74c3c", color: "#fff" }}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
           </tbody>
         </table>
       </div>

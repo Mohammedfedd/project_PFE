@@ -20,6 +20,8 @@ const Header = ({ isAuth }) => {
           Courses
         </a>
 
+        <Link to={"/educators"}>Educators</Link>  {/* New Educators tab */}
+
         <Link to={"/about"}>About</Link>
         {isAuth ? (
           <Link to={"/account"}>Account</Link>

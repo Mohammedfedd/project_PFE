@@ -25,6 +25,8 @@ import AdminCourses from './admin/Courses/AdminCourses.jsx';
 import AdminUsers from './admin/Users/AdminUsers.jsx';
 import AdminCategory from './admin/Category/AdminCategory.jsx';
 import AdminSales from './admin/Sales/AdminSales.jsx';
+import AdminEducator from './admin/Educators/AdminEducators.jsx';
+import Educators from './pages/educators/Educators.jsx';
 
 
 const App = () => {
@@ -40,6 +42,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home setPageLoading={setPageLoading} />} />
         <Route path="/about" element={<About setPageLoading={setPageLoading} />} />
+        <Route path="/educators" element={<Educators setPageLoading={setPageLoading} />} />
         <Route path="/courses" element={<Courses user={user} setPageLoading={setPageLoading} />} />
         <Route path="/account" element={isAuth ? <Account user={user} setPageLoading={setPageLoading} /> : <Login setPageLoading={setPageLoading} />} />
         <Route path="/login" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Login setPageLoading={setPageLoading} />} />
@@ -58,6 +61,7 @@ const App = () => {
         <Route path="/admin/users" element={isAuth ? <AdminUsers user={user} /> : <Login />}/>
         <Route path="/admin/category" element={isAuth ? <AdminCategory user={user} /> : <Login />}/>
         <Route path="/admin/sales" element={isAuth ? <AdminSales user={user} /> : <Login />}/>
+        <Route path="/admin/educators" element={isAuth ? <AdminEducator user={user} /> : <Login />}/>
       </Routes>
       <Footer />
     </BrowserRouter>

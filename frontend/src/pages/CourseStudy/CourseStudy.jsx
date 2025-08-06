@@ -9,13 +9,18 @@ const CourseStudy = ({ user }) => {
   const { fetchCourse, course } = CourseData();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user && user.role !== "admin" && !user.subscription.includes(params.id)) {
-      navigate("/");
-    } else {
-      fetchCourse(params.id);
-    }
-  }, [params.id, user]);
+useEffect(() => {
+  if (
+    user && 
+    user.role !== "admin" && 
+    user.role !== "superadmin" &&  
+    !user.subscription.includes(params.id)
+  ) {
+    navigate("/");
+  } else {
+    fetchCourse(params.id);
+  }
+}, [params.id, user]);
 
   if (!course) {
     return <div className="course-loading">Loading...</div>;

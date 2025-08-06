@@ -27,7 +27,9 @@ export const fetchLectures = TryCatch(async (req, res) => {
   const lectures = await Lecture.find({ course: req.params.id });
   const user = await User.findById(req.user._id);
 
-  if (user.role === "admin") return res.json({ lectures });
+  if (user.role === "admin" || user.role === "superadmin") {
+    return res.json({ lectures });
+  }
 
   if (!user.subscription.includes(req.params.id)) {
     return res.status(400).json({ message: "You have not subscribed to this course" });
@@ -41,7 +43,9 @@ export const fetchLecture = TryCatch(async (req, res) => {
   const lecture = await Lecture.findById(req.params.id);
   const user = await User.findById(req.user._id);
 
-  if (user.role === "admin") return res.json({ lecture });
+  if (user.role === "admin" || user.role === "superadmin") {
+    return res.json({ lecture });
+  }
 
   if (!user.subscription.includes(lecture.course.toString())) {
     return res.status(400).json({ message: "You have not subscribed to this course" });
@@ -141,11 +145,12 @@ export const paymentVerification = TryCatch(async (req, res) => {
     });
 
     await user.save();
-     await Progress.create({
+
+    await Progress.create({
       course: course._id,
       completedLectures: [],
       completedQuizzes: [],
-      user: user._id,  
+      user: user._id,
     });
 
     await sendReceiptMail({
@@ -223,7 +228,7 @@ export const refundCourse = TryCatch(async (req, res) => {
   payment.status = "refunded";
   await payment.save();
 
-  // ❌ Delete progress record for this user and course
+  // Delete progress record for this user and course
   await Progress.deleteOne({ user: userId, course: courseId });
 
   // Notify user and admin
@@ -245,6 +250,7 @@ export const refundCourse = TryCatch(async (req, res) => {
 
   res.status(200).json({ message: "Refund processed successfully" });
 });
+
 export const addProgress = TryCatch(async (req, res) => {
   const progress = await Progress.findOne({
     user: req.user._id,
@@ -278,8 +284,6 @@ export const addProgress = TryCatch(async (req, res) => {
   });
 });
 
-
-
 export const getYourProgress = TryCatch(async (req, res) => {
   try {
     const userId = req.user._id;
@@ -297,16 +301,16 @@ export const getYourProgress = TryCatch(async (req, res) => {
     if (!progress) {
       const user = await User.findById(userId);
 
-     if (
-  !user.subscription.includes(courseId) &&
-  user.role !== "admin" &&
-  user.role !== "superadmin"
-) {
-  return res.status(403).json({
-    success: false,
-    message: "User not subscribed to this course",
-  });
-}
+      if (
+        !user.subscription.includes(courseId) &&
+        user.role !== "admin" &&
+        user.role !== "superadmin"
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "User not subscribed to this course",
+        });
+      }
 
       progress = await Progress.create({
         user: userId,

@@ -10,7 +10,7 @@ const Header = ({ isAuth }) => {
 
   return (
     <header>
-      <div className="logo">E-Learning</div>
+      <div className="logo">Arti-learn</div>
 
       <div className="link">
         <Link to={"/"}>Home</Link>

@@ -73,8 +73,18 @@ const [certificateUrl, setCertificateUrl] = useState(() => {
   const TiArrowLeft = () => "←";
   const TiPlay = () => "▶";
 
-  if (user && user.role !== "admin" && !user.subscription.includes(params.id))
-    return navigate("/");
+ useEffect(() => {
+  if (user) {
+    const isAuthorized = 
+      user.role === "admin" || 
+      user.role === "superadmin" || 
+      user.subscription.includes(params.id);
+    
+    if (!isAuthorized) {
+      navigate("/");
+    }
+  }
+}, [user, params.id, navigate]);
 
   async function fetchLectures() {
     try {
@@ -287,16 +297,18 @@ const submitQuiz = async () => {
     );
 
     if (data.success) {
-      // 2. Mark quiz as completed in progress
-      await axios.post(
-        `${server}/api/user/progress?course=${params.id}&quizId=${quizData._id}`,
-        {},
-        {
-          headers: {
-            token: localStorage.getItem("token")
+      // 2. Only mark quiz as completed if passed
+      if (data.passed) {
+        await axios.post(
+          `${server}/api/user/progress?course=${params.id}&quizId=${quizData._id}`,
+          {},
+          {
+            headers: {
+              token: localStorage.getItem("token")
+            }
           }
-        }
-      );
+        );
+      }
 
       // 3. Update UI with results
       setQuizResults({
@@ -321,7 +333,6 @@ const submitQuiz = async () => {
     setQuizBtnLoading(false);
   }
 };
-
 
   const resetQuiz = () => {
     setUserAnswers({});
@@ -1055,7 +1066,7 @@ const submitQuiz = async () => {
         </div>
 
         <div className="sidebar">
-          {user?.role === "admin" && (
+          {(user?.role === "admin" || user?.role === "superadmin") && ( 
             <>
               <button
                 className="add-lecture-btn"
@@ -1478,23 +1489,23 @@ const submitQuiz = async () => {
       >
       <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         {i + 1}. {item.title}
-        {(item.type === 'lecture' && progress?.completedLectures?.includes(item._id)) || 
-         (item.type === 'quiz' && progress?.completedQuizzes?.includes(item._id)) ? (
-          <span
-            style={{
-              background: "#28a745",
-              padding: "2px 6px",
-              borderRadius: "6px",
-              color: "white",
-              fontSize: "12px",
-              fontWeight: "bold"
-            }}
-          >
-            ✓
-          </span>
-        ) : null}
+          {(item.type === 'lecture' && progress?.completedLectures?.includes(item._id)) || 
+          (item.type === 'quiz' && progress?.completedQuizzes?.includes(item._id)) ? (
+            <span
+              style={{
+                background: "#28a745",
+                padding: "2px 6px",
+                borderRadius: "6px",
+                color: "white",
+                fontSize: "12px",
+                fontWeight: "bold"
+              }}
+            >
+              ✓
+            </span>
+          ) : null}
       </span>
-      {user?.role === "admin" && (
+      {(user?.role === "admin" || user?.role === "superadmin") && (
         <button
           onClick={(ev) => {
             ev.stopPropagation();

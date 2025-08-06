@@ -1,7 +1,6 @@
 import { Quiz } from '../models/Quiz.js';
 import { Courses } from '../models/Courses.js';
 
-// Admin: Add a new quiz to a specific course
 export const addQuiz = async (req, res) => {
   try {
     const { courseId, title, questions } = req.body;
@@ -37,7 +36,6 @@ export const addQuiz = async (req, res) => {
   }
 };
 
-// Admin: Delete a quiz by ID
 export const deleteQuiz = async (req, res) => {
   try {
     const { id } = req.params;

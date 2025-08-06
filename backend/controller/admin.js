@@ -9,6 +9,7 @@ import { Category } from "../models/Category.js";
 import { Quiz } from "../models/Quiz.js";
 import { Payment } from "../models/Payment.js";
 import { Educator } from "../models/Educator.js";
+import { Progress } from "../models/Progress.js";
 
 const unlinkAsync = promisify(fs.unlink);
 
@@ -297,3 +298,36 @@ export const deleteEducator = TryCatch(async (req, res) => {
   await educator.deleteOne();
   res.json({ message: "Educator deleted successfully" });
 });
+export const deleteProgress = async (req, res) => {
+  try {
+    console.log("User ID:", req.user?._id);
+    console.log("Course ID:", req.params.id);
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const userId = req.user._id.toString();
+    const courseId = req.params.id.toString();
+
+    const user = await User.findById(userId);
+    const course = await Courses.findById(courseId);
+
+    if (!user || !course) {
+      return res.status(404).json({ message: "User or course not found" });
+    }
+
+    const progress = await Progress.findOne({ user: userId, course: courseId });
+
+    if (!progress) {
+      return res.status(404).json({ message: "Progress record not found" });
+    }
+
+    await Progress.deleteOne({ user: userId, course: courseId });
+
+    res.status(200).json({ message: "Progress record deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteProgress:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

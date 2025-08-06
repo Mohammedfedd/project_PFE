@@ -11,8 +11,7 @@ const Dashboard = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [coursesWithProgress, setCoursesWithProgress] = useState([]);
-
-  // Memoized progress calculation
+  const [searchTerm, setSearchTerm] = useState("");
   const calculateCourseProgress = useCallback(async (course) => {
     try {
       const { data } = await axios.get(
@@ -53,7 +52,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  // Fetch data only when needed
   useEffect(() => {
     let isMounted = true;
 
@@ -89,11 +87,20 @@ const Dashboard = () => {
     };
   }, [fetchMyCourse, mycourse?.length, calculateCourseProgress]);
 
-  // Memoized filtered courses
-  const filteredCourses = useMemo(() => {
-    if (!coursesWithProgress || coursesWithProgress.length === 0) return [];
+  // Filter courses by search term (case-insensitive)
+  const searchedCourses = useMemo(() => {
+    if (!searchTerm) return coursesWithProgress;
+    const lowerSearch = searchTerm.toLowerCase();
+    return coursesWithProgress.filter(course =>
+      course.title.toLowerCase().includes(lowerSearch)
+    );
+  }, [coursesWithProgress, searchTerm]);
 
-    return coursesWithProgress.filter(course => {
+  // Memoized filtered courses (filter + search)
+  const filteredCourses = useMemo(() => {
+    if (!searchedCourses || searchedCourses.length === 0) return [];
+
+    return searchedCourses.filter(course => {
       switch (activeFilter) {
         case 'completed':
           return course.isCompleted;
@@ -103,9 +110,8 @@ const Dashboard = () => {
           return true;
       }
     });
-  }, [coursesWithProgress, activeFilter]);
+  }, [searchedCourses, activeFilter]);
 
-  // Memoized stats
   const stats = useMemo(() => {
     if (!coursesWithProgress || coursesWithProgress.length === 0) {
       return { total: 0, completed: 0, inProgress: 0 };
@@ -159,6 +165,24 @@ const Dashboard = () => {
               <span className="filter-count">({filteredCourses.length})</span>
             )}
           </h2>
+
+          {/* Search bar */}
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search courses..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              marginLeft: "1rem",
+              padding: "6px 12px",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              fontSize: "1rem",
+              width: "250px",
+            }}
+          />
+
           <div className="section-actions">
             <button
               className={`filter-btn ${activeFilter === 'all' ? 'active' : ''}`}

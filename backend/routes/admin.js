@@ -23,6 +23,7 @@ import {
 } from '../controller/admin.js';
 import { addQuiz, deleteQuiz } from '../controller/QuizController.js';
 import { uploadFiles } from '../middlewares/multer.js';
+import { deleteProgress } from '../controller/admin.js'; // <-- import here
 
 const router = express.Router();
 
@@ -53,4 +54,6 @@ router.get('/educators', getAllEducators);
 router.put('/educator/:id', isAuth, isAdmin, updateEducator);
 router.delete('/educator/:id', isAuth, isAdmin, deleteEducator);
 
+// Progress Management
+router.delete('/progress/:id', isAuth, isAdmin, deleteProgress);  
 export default router;

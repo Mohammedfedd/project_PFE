@@ -11,8 +11,11 @@ const CourseCard = ({ course }) => {
   const navigate = useNavigate();
   const { user, isAuth } = UserData();
   const { fetchCourses } = CourseData();
+
   const [progress, setProgress] = useState(0);
   const [certificateUrl, setCertificateUrl] = useState(null);
+
+  const isAdminOrSuperadmin = user && (user.role === "admin" || user.role === "superadmin");
 
   useEffect(() => {
     if (isAuth && user?.subscription.includes(course._id)) {
@@ -70,7 +73,7 @@ const CourseCard = ({ course }) => {
   }, [isAuth, user, course._id]);
 
   const deleteHandler = async (id) => {
-    if (confirm("Are you sure you want to delete this course")) {
+    if (confirm("Are you sure you want to delete this course?")) {
       try {
         const { data } = await axios.delete(`${server}/api/course/${id}`, {
           headers: {
@@ -86,9 +89,30 @@ const CourseCard = ({ course }) => {
     }
   };
 
+  // New handler for deleting progress
+  const deleteProgressHandler = async () => {
+    if (confirm("Are you sure you want to delete the progress for this course? This action cannot be undone.")) {
+      try {
+        const { data } = await axios.delete(`${server}/api/progress/${course._id}`, {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        });
+
+        toast.success(data.message);
+        // Optional: refresh courses or progress here if needed
+        // fetchCourses();
+        setProgress(0);
+        setCertificateUrl(null);
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to delete progress");
+      }
+    }
+  };
+
   return (
     <div className="course-card" style={{ position: "relative" }}>
-      {course.comingSoon && user?.role === "admin" && (
+      {course.comingSoon && isAdminOrSuperadmin && (
         <div
           style={{
             position: "absolute",
@@ -117,50 +141,41 @@ const CourseCard = ({ course }) => {
 
       {isAuth ? (
         <>
-          {user && user.role !== "admin" ? (
+          {(user.subscription.includes(course._id) || isAdminOrSuperadmin) ? (
             <>
-              {user.subscription.includes(course._id) ? (
-                <>
-                  <button
-                    onClick={() => navigate(`/course/study/${course._id}`)}
-                    className="common-btn"
-                  >
-                    Study
-                  </button>
+              <button
+                onClick={() => navigate(`/course/study/${course._id}`)}
+                className="common-btn"
+              >
+                Study
+              </button>
 
-                  {progress === 100 && certificateUrl ? (
-                    <button
-                      onClick={() => window.open(`${server}${certificateUrl}`, "_blank")}
-                      className="common-btn"
-                      style={{ backgroundColor: "#28a745", marginTop: "8px" }}
-                    >
-                      View Certificate Again
-                    </button>
-                  ) : progress < 50 ? (
-                    <button
-                      onClick={() => navigate(`/refund/${course._id}`)}
-                      className="common-btn"
-                      style={{ backgroundColor: "#ff4d4f", marginTop: "8px" }}
-                    >
-                      Request Refund
-                    </button>
-                  ) : null}
-                </>
-              ) : (
+              {progress === 100 && certificateUrl && (
                 <button
-                  onClick={() => navigate(`/course/${course._id}`)}
+                  onClick={() => window.open(`${server}${certificateUrl}`, "_blank")}
                   className="common-btn"
+                  style={{ backgroundColor: "#28a745", marginTop: "8px" }}
                 >
-                  Get Started
+                  View Certificate Again
+                </button>
+              )}
+
+              {!isAdminOrSuperadmin && progress < 50 && (
+                <button
+                  onClick={() => navigate(`/refund/${course._id}`)}
+                  className="common-btn"
+                  style={{ backgroundColor: "#ff4d4f", marginTop: "8px" }}
+                >
+                  Request Refund
                 </button>
               )}
             </>
           ) : (
             <button
-              onClick={() => navigate(`/course/study/${course._id}`)}
+              onClick={() => navigate(`/course/${course._id}`)}
               className="common-btn"
             >
-              Study
+              Get Started
             </button>
           )}
         </>
@@ -172,14 +187,24 @@ const CourseCard = ({ course }) => {
 
       <br />
 
-      {user && user.role === "admin" && (
-        <button
-          onClick={() => deleteHandler(course._id)}
-          className="common-btn"
-          style={{ background: "red", marginTop: "8px" }}
-        >
-          Delete
-        </button>
+      {isAdminOrSuperadmin && (
+        <>
+          <button
+            onClick={() => deleteHandler(course._id)}
+            className="common-btn"
+            style={{ background: "red", marginTop: "8px" }}
+          >
+            Delete Course
+          </button>
+
+          <button
+            onClick={deleteProgressHandler}
+            className="common-btn"
+            style={{ background: "#ff6600", marginTop: "8px" }}
+          >
+            Delete Progress
+          </button>
+        </>
       )}
     </div>
   );

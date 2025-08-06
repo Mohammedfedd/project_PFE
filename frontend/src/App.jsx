@@ -27,6 +27,8 @@ import AdminCategory from './admin/Category/AdminCategory.jsx';
 import AdminSales from './admin/Sales/AdminSales.jsx';
 import AdminEducator from './admin/Educators/AdminEducators.jsx';
 import Educators from './pages/educators/Educators.jsx';
+import ForgotPassword from './pages/auth/ForgotPassword.jsx'
+import ResetPassword from './pages/auth/ResetPassword.jsx'
 
 
 const App = () => {
@@ -48,6 +50,9 @@ const App = () => {
         <Route path="/login" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Login setPageLoading={setPageLoading} />} />
         <Route path="/register" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Register setPageLoading={setPageLoading} />} />
         <Route path="/verify" element={isAuth ? <Home setPageLoading={setPageLoading} /> : <Verify setPageLoading={setPageLoading} />} />
+        <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
+        <Route path="/forgot-password" element={isAuth ? <Home /> : <ForgotPassword/>}/>
+        <Route path="/reset-password/:token" element={isAuth ? <Home /> : <ResetPassword />}/>
         <Route path="/course/:id" element={isAuth ? <CourseDescription setPageLoading={setPageLoading} /> : <Login setPageLoading={setPageLoading} />} />
         <Route path="/payment-success" element={<PaymentSuccess user={user} setPageLoading={setPageLoading} />} />
         <Route path="/payment-cancel" element={<PaymentCanceled setPageLoading={setPageLoading} />} />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { server } from "../../main"; // adjust if needed
+import { server } from "../../main";
 import Layout from "../Utils/Layout";
 import "./category.css";
 
@@ -10,6 +10,7 @@ const AdminCategory = () => {
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchCategories = async () => {
     try {
@@ -80,7 +81,6 @@ const AdminCategory = () => {
         headers: { token: localStorage.getItem("token") },
       });
       toast.success("Category deleted");
-      // If deleting currently editing category, reset edit state
       if (editingId === id) {
         setEditingId(null);
         setEditingName("");
@@ -90,6 +90,10 @@ const AdminCategory = () => {
       toast.error(error.response?.data?.message || "Error deleting category");
     }
   };
+
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Layout>
@@ -109,6 +113,16 @@ const AdminCategory = () => {
           </button>
         </form>
 
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Search categories..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="category-search-input"
+          />
+        </div>
+
         <table className="category-table">
           <thead>
             <tr>
@@ -118,14 +132,14 @@ const AdminCategory = () => {
             </tr>
           </thead>
           <tbody>
-            {categories.length === 0 ? (
+            {filteredCategories.length === 0 ? (
               <tr>
                 <td colSpan="3" style={{ textAlign: "center" }}>
                   No categories found.
                 </td>
               </tr>
             ) : (
-              categories.map((cat, i) => (
+              filteredCategories.map((cat, i) => (
                 <tr key={cat._id}>
                   <td>{i + 1}</td>
                   <td>

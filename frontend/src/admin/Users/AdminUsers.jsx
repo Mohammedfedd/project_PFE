@@ -9,15 +9,15 @@ import toast from "react-hot-toast";
 const AdminUsers = ({ user }) => {
   const navigate = useNavigate();
 
-  // Restrict access: only allow users with role "admin" or "superadmin" to access this page
   if (user && user.role !== "admin" && user.role !== "superadmin") {
     navigate("/");
-    return null; // prevent rendering while redirecting
+    return null;
   }
 
   const [users, setUsers] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [selectedRole, setSelectedRole] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   async function fetchUsers() {
     try {
@@ -91,10 +91,41 @@ const AdminUsers = ({ user }) => {
     }
   };
 
+  // Filter users based on searchTerm
+  const filteredUsers = users
+    .filter((u) => u.role !== "superadmin")
+    .filter((u) => {
+      const term = searchTerm.toLowerCase();
+      return (
+        u.firstName.toLowerCase().includes(term) ||
+        u.lastName.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
+      );
+    });
+
   return (
     <Layout>
       <div className="users">
         <h1>All Users</h1>
+
+        {/* Search bar */}
+        <input
+          type="text"
+          placeholder="Search by first name, last name or email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+          style={{
+            marginBottom: "1rem",
+            padding: "8px",
+            width: "100%",
+            maxWidth: "400px",
+            fontSize: "16px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+          }}
+        />
+
         <table>
           <thead>
             <tr>
@@ -107,65 +138,62 @@ const AdminUsers = ({ user }) => {
             </tr>
           </thead>
           <tbody>
-            {users &&
-              users
-                .filter((u) => u.role !== "superadmin") // Exclude superadmin users here
-                .map((e, i) => (
-                  <tr key={e._id}>
-                    <td>{i + 1}</td>
-                    <td>{e.firstName}</td>
-                    <td>{e.lastName}</td>
-                    <td>{e.email}</td>
-                    <td>
-                      {editingId === e._id ? (
-                        <select
-                          value={selectedRole}
-                          onChange={(e) => setSelectedRole(e.target.value)}
-                          className="role-select"
-                        >
-                          <option value="user">User</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      ) : (
-                        e.role
-                      )}
-                    </td>
-                    <td>
-                      {editingId === e._id ? (
-                        <>
-                          <button
-                            onClick={() => updateRole(e._id)}
-                            className="common-btn save-btn"
-                          >
-                            Save
-                          </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="common-btn cancel-btn"
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => startEdit(e._id, e.role)}
-                            className="common-btn edit-btn"
-                          >
-                            Edit Role
-                          </button>
-                          <button
-                            onClick={() => deleteUser(e._id)}
-                            className="common-btn delete-btn"
-                            style={{ marginLeft: "8px", backgroundColor: "#e74c3c", color: "#fff" }}
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+            {filteredUsers.map((e, i) => (
+              <tr key={e._id}>
+                <td>{i + 1}</td>
+                <td>{e.firstName}</td>
+                <td>{e.lastName}</td>
+                <td>{e.email}</td>
+                <td>
+                  {editingId === e._id ? (
+                    <select
+                      value={selectedRole}
+                      onChange={(e) => setSelectedRole(e.target.value)}
+                      className="role-select"
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  ) : (
+                    e.role
+                  )}
+                </td>
+                <td>
+                  {editingId === e._id ? (
+                    <>
+                      <button
+                        onClick={() => updateRole(e._id)}
+                        className="common-btn save-btn"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="common-btn cancel-btn"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => startEdit(e._id, e.role)}
+                        className="common-btn edit-btn"
+                      >
+                        Edit Role
+                      </button>
+                      <button
+                        onClick={() => deleteUser(e._id)}
+                        className="common-btn delete-btn"
+                        style={{ marginLeft: "8px", backgroundColor: "#e74c3c", color: "#fff" }}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

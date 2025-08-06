@@ -49,6 +49,22 @@ const Lecture = ({ user }) => {
   const [autoProgressCountdown, setAutoProgressCountdown] = useState(0);
   const [showCompletionMessage, setShowCompletionMessage] = useState(false);
 
+  // Progress states
+  const [completed, setCompleted] = useState("");
+  const [completedLec, setCompletedLec] = useState("");
+  const [lectLength, setLectLength] = useState("");
+  const [progress, setProgress] = useState([]);
+  const [initialLoad, setInitialLoad] = useState(true);
+ const [generatingCert, setGeneratingCert] = useState(false);
+const [certError, setCertError] = useState(null);
+const [certificateUrl, setCertificateUrl] = useState(() => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(`certificate_${params.id}`) || null;
+  }
+  return null;
+});
+
+
   // Icon shortcuts
   const TiTick = () => "✓";
   const TiPlus = () => "+";
@@ -84,6 +100,69 @@ const Lecture = ({ user }) => {
       setQuizzes([]);
     }
   }
+
+ async function fetchProgress() {
+  try {
+    const { data } = await axios.get(
+      `${server}/api/user/progress?course=${params.id}`,
+      {
+        headers: {
+          token: localStorage.getItem("token"),
+        }
+      }
+    );
+
+    if (data.success) {
+      const totalLectures = data.allLectures?.length || 0;
+      const totalQuizzes = data.allQuizzes?.length || 0;
+      const totalItems = totalLectures + totalQuizzes;
+
+      const completedLectures = data.completedLectures?.length || 0;
+      const completedQuizzes = data.completedQuizzes?.length || 0;
+      const completedItems = completedLectures + completedQuizzes;
+
+      const percentage = totalItems > 0
+        ? Math.round((completedItems / totalItems) * 100)
+        : 0;
+
+      setCompleted(percentage);
+      setCompletedLec(completedItems);  
+      setLectLength(totalItems);        
+      setProgress(data.progress);
+    } else {
+      console.error("Progress fetch failed:", data.message);
+      setCompleted(0);
+      setCompletedLec(0);
+      setLectLength(0);
+      setProgress([]);
+    }
+  } catch (error) {
+    console.error("Progress fetch error:", error.stack || error.message);
+    setCompleted(0);
+    setCompletedLec(0);
+    setLectLength(0);
+    setProgress([]);
+  }
+}
+
+
+  const addProgress = async (id) => {
+    try {
+      const { data } = await axios.post(
+        `${server}/api/user/progress?course=${params.id}&lectureId=${id}`,
+        {},
+        {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        }
+      );
+      console.log(data.message);
+      fetchProgress();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   async function fetchLecture(id) {
     setLecLoading(true);
@@ -139,57 +218,110 @@ const Lecture = ({ user }) => {
       [questionIndex]: optionIndex
     }));
   };
+  const handleGenerateCertificate = async () => {
+  setGeneratingCert(true);
+  setCertError(null);
+  try {
+    const { data } = await axios.post(
+      `${server}/api/user/generate-certificate`,
+      { courseId: params.id },
+      { 
+        headers: { 
+          'Content-Type': 'application/json',
+          token: localStorage.getItem("token") 
+        } 
+      }
+    );
 
-  const submitQuiz = async () => {
-    if (!quizData || quizSubmitted) return;
-
-    const totalQuestions = quizData.questions.length;
-    const answeredQuestions = Object.keys(userAnswers).length;
-
-    if (answeredQuestions < totalQuestions) {
-      toast.error(`Please answer all questions. ${answeredQuestions}/${totalQuestions} answered.`);
-      return;
+    if (!data.success) {
+      throw new Error(data.message || "Certificate generation failed");
     }
 
-    setQuizBtnLoading(true);
+    // Store in both state and localStorage
+    localStorage.setItem(`certificate_${params.id}`, data.certificateUrl);
+    setCertificateUrl(data.certificateUrl);
+    window.open(`${server}${data.certificateUrl}`, '_blank');
+    toast.success("Certificate generated successfully!");
 
-    try {
-      const answersArray = quizData.questions.map((_, index) => userAnswers[index] ?? null);
+  } catch (error) {
+    console.error("Certificate generation error:", error);
+    setCertError(
+      error.response?.data?.message || 
+      error.message || 
+      "Failed to generate certificate. Please try again later."
+    );
+  } finally {
+    setGeneratingCert(false);
+  }
+};
 
-      const { data } = await axios.post(
-        `${server}/api/user/quiz/submit`,
-        {
-          quizId: quizData._id,
-          answers: answersArray
-        },
+const submitQuiz = async () => {
+  if (!quizData || quizSubmitted) return;
+
+  const totalQuestions = quizData.questions.length;
+  const answeredQuestions = Object.keys(userAnswers).length;
+
+  if (answeredQuestions < totalQuestions) {
+    toast.error(`Please answer all questions. ${answeredQuestions}/${totalQuestions} answered.`);
+    return;
+  }
+
+  setQuizBtnLoading(true);
+
+  try {
+    // 1. Submit the quiz answers
+    const answersArray = quizData.questions.map((_, index) => userAnswers[index] ?? null);
+
+    const { data } = await axios.post(
+      `${server}/api/user/quiz/submit`,
+      {
+        quizId: quizData._id,
+        answers: answersArray
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          token: localStorage.getItem("token")
+        }
+      }
+    );
+
+    if (data.success) {
+      // 2. Mark quiz as completed in progress
+      await axios.post(
+        `${server}/api/user/progress?course=${params.id}&quizId=${quizData._id}`,
+        {},
         {
           headers: {
-            'Content-Type': 'application/json',
             token: localStorage.getItem("token")
           }
         }
       );
 
-      if (data.success) {
-        setQuizResults({
-          score: data.correctAnswers,
-          correctAnswers: data.correctAnswers,
-          totalQuestions: data.totalQuestions,
-          detailedResults: data.detailedResults,
-          passed: data.passed
-        });
-        setQuizSubmitted(true);
-        toast.success(data.message);
-      } else {
-        toast.error(data.message || "Quiz submission failed");
-      }
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast.error(error.response?.data?.message || "Error submitting quiz");
-    } finally {
-      setQuizBtnLoading(false);
+      // 3. Update UI with results
+      setQuizResults({
+        score: data.correctAnswers,
+        correctAnswers: data.correctAnswers,
+        totalQuestions: data.totalQuestions,
+        detailedResults: data.detailedResults,
+        passed: data.passed
+      });
+      setQuizSubmitted(true);
+      toast.success(data.message);
+
+      // 4. Refresh progress
+      fetchProgress();
+    } else {
+      toast.error(data.message || "Quiz submission failed");
     }
-  };
+  } catch (error) {
+    console.error('Submission error:', error);
+    toast.error(error.response?.data?.message || "Error submitting quiz");
+  } finally {
+    setQuizBtnLoading(false);
+  }
+};
+
 
   const resetQuiz = () => {
     setUserAnswers({});
@@ -239,6 +371,7 @@ const Lecture = ({ user }) => {
       setBtnLoading(false);
       setShowLectureForm(false);
       fetchLectures();
+      fetchProgress();
       setTitle("");
       setDescription("");
       setVideo(null);
@@ -257,6 +390,7 @@ const Lecture = ({ user }) => {
         });
         toast.success(data.message);
         fetchLectures();
+        fetchProgress();
       } catch (error) {
         toast.error(error.response?.data?.message || "Delete failed");
       }
@@ -278,29 +412,42 @@ const Lecture = ({ user }) => {
   };
 
   const handleVideoEnd = async () => {
-    if (!lecture) return;
-    setIsVideoCompleted(true);
-    setShowCompletionMessage(true);
+  if (!lecture) return;
+  
+  // Add progress when video ends
+  await addProgress(lecture._id);
+  
+  setIsVideoCompleted(true);
+  setShowCompletionMessage(true);
 
-    const nextIndex = currentLectureIndex + 1;
-    if (nextIndex < lectures.length) {
-      let countdown = 10;
+  const orderedContent = getOrderedContent();
+  const currentIndex = orderedContent.findIndex(item => 
+    item.type === 'lecture' && item._id === lecture._id
+  );
+
+  // Only show countdown if not at 100% progress
+  if (currentIndex < orderedContent.length - 1 && completed < 100) {
+    let countdown = 10;
+    setAutoProgressCountdown(countdown);
+
+    const interval = setInterval(() => {
+      countdown--;
       setAutoProgressCountdown(countdown);
-
-      const interval = setInterval(() => {
-        countdown--;
-        setAutoProgressCountdown(countdown);
-        if (countdown <= 0) {
-          clearInterval(interval);
-          fetchLecture(lectures[nextIndex]._id);
+      if (countdown <= 0) {
+        clearInterval(interval);
+        if (orderedContent[currentIndex + 1].type === 'lecture') {
+          fetchLecture(orderedContent[currentIndex + 1]._id);
+        } else {
+          fetchQuiz(orderedContent[currentIndex + 1]._id);
         }
-      }, 1000);
+      }
+    }, 1000);
 
-      window.autoProgressInterval = interval;
-    } else {
-      toast.success("🎉 Course completed!");
-    }
-  };
+    window.autoProgressInterval = interval;
+  } else if (completed >= 100) {
+    toast.success("🎉 Course completed!");
+  }
+};
 
   const cancelAutoProgress = () => {
     if (window.autoProgressInterval) {
@@ -311,12 +458,24 @@ const Lecture = ({ user }) => {
   };
 
   const goToNextLecture = () => {
-    const nextIndex = currentLectureIndex + 1;
-    if (nextIndex < lectures.length) {
-      cancelAutoProgress();
-      fetchLecture(lectures[nextIndex]._id);
+  const orderedContent = getOrderedContent();
+  const currentIndex = orderedContent.findIndex(item => 
+    (item.type === 'lecture' && item._id === lecture?._id) || 
+    (item.type === 'quiz' && item._id === quizData?._id)
+  );
+
+  if (currentIndex < orderedContent.length - 1) {
+    cancelAutoProgress();
+    const nextItem = orderedContent[currentIndex + 1];
+    if (nextItem.type === 'lecture') {
+      fetchLecture(nextItem._id);
+    } else {
+      fetchQuiz(nextItem._id);
     }
-  };
+  } else if (completed >= 100) {
+    toast.success("🎉 Course completed!");
+  }
+};
 
   const updateQuestionText = (index, text) => {
     const copy = [...questions];
@@ -649,47 +808,66 @@ const Lecture = ({ user }) => {
         )}
 
         <div className="quiz-actions" style={{ marginTop: "30px", textAlign: "center" }}>
-          {!quizSubmitted ? (
-            <button
-  onClick={submitQuiz}
-  disabled={quizBtnLoading || Object.keys(userAnswers).length !== quizData.questions.length}
-  style={{
-    backgroundColor: Object.keys(userAnswers).length === quizData.questions.length ? "#28a745" : "#6c757d",
-    color: "white",
-    border: "none",
-    padding: "12px 24px",
-    borderRadius: "4px",
-    cursor: Object.keys(userAnswers).length === quizData.questions.length ? "pointer" : "not-allowed",
-    fontSize: "16px",
-    fontWeight: "bold",
-    opacity: Object.keys(userAnswers).length === quizData.questions.length ? 1 : 0.7
-  }}
->
-  {quizBtnLoading ? "Submitting..." : "Submit Quiz"}
-</button>
-          ) : (
-            <button
-              onClick={resetQuiz}
-              style={{
-                backgroundColor: "#007bff",
-                color: "white",
-                border: "none",
-                padding: "12px 24px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "16px",
-                fontWeight: "bold"
-              }}
-            >
-              Take Quiz Again
-            </button>
-          )}
-        </div>
+  {!quizSubmitted ? (
+    <button
+      onClick={submitQuiz}
+      disabled={quizBtnLoading || Object.keys(userAnswers).length !== quizData.questions.length}
+      style={{
+        backgroundColor: Object.keys(userAnswers).length === quizData.questions.length ? "#28a745" : "#6c757d",
+        color: "white",
+        border: "none",
+        padding: "12px 24px",
+        borderRadius: "4px",
+        cursor: Object.keys(userAnswers).length === quizData.questions.length ? "pointer" : "not-allowed",
+        fontSize: "16px",
+        fontWeight: "bold",
+        opacity: Object.keys(userAnswers).length === quizData.questions.length ? 1 : 0.7
+      }}
+    >
+      {quizBtnLoading ? "Submitting..." : "Submit Quiz"}
+    </button>
+  ) : (
+    <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
+      <button
+        onClick={resetQuiz}
+        style={{
+          backgroundColor: "#007bff",
+          color: "white",
+          border: "none",
+          padding: "12px 24px",
+          borderRadius: "4px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          flex: 1,
+          maxWidth: "200px"
+        }}
+      >
+        Take Quiz Again
+      </button>
+      <button
+        onClick={goToNextLecture}
+        style={{
+          backgroundColor: "#28a745",
+          color: "white",
+          border: "none",
+          padding: "12px 24px",
+          borderRadius: "4px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          flex: 1,
+          maxWidth: "200px"
+        }}
+      >
+        Next Content
+      </button>
+    </div>
+  )}
+</div>
       </div>
     );
   };
-
-  // Function to merge and sort lectures and quizzes by creation date
   const getOrderedContent = () => {
     if (!lectures || !quizzes) return [];
     
@@ -704,6 +882,7 @@ const Lecture = ({ user }) => {
   useEffect(() => {
     fetchLectures();
     fetchQuizzes();
+    fetchProgress();
     return () => {
       if (window.autoProgressInterval) clearInterval(window.autoProgressInterval);
     };
@@ -717,6 +896,35 @@ const Lecture = ({ user }) => {
 
   return (
     <div className="lecture-container">
+      {/* Progress Bar */}
+      <div className="progress" style={{
+        background: "#fff",
+        padding: "15px 20px",
+        marginBottom: "20px",
+        borderRadius: "8px",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+      }}>
+        <div style={{ marginBottom: "10px", color: "#333", fontWeight: "500" }}>
+          Course Progress - {completedLec} out of {lectLength}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          <progress 
+            value={completed} 
+            max={100}
+            style={{
+              flex: 1,
+              height: "8px",
+              borderRadius: "4px",
+              appearance: "none",
+              WebkitAppearance: "none"
+            }}
+          />
+          <span style={{ color: "#6e48aa", fontWeight: "bold", fontSize: "16px" }}>
+            {completed}%
+          </span>
+        </div>
+      </div>
+
       <div className="lecture-main">
         <div className="video-section">
           {lecLoading ? (
@@ -734,25 +942,102 @@ const Lecture = ({ user }) => {
                   controlsList="nodownload noremoteplayback"
                   disablePictureInPicture
                 />
-                {showCompletionMessage && (
-                  <div className="video-completion-overlay">
-                    <div className="completion-content">
-                      <div className="completion-checkmark">✓</div>
-                      <h3 className="completion-title">Lecture Completed!</h3>
-                      <p className="completion-subtitle">Great job finishing this lecture</p>
-                      {autoProgressCountdown > 0 && (
-                        <div className="auto-progress-notice">
-                          <p>Next lecture in</p>
-                          <div className="countdown-timer">{autoProgressCountdown}</div>
-                        </div>
-                      )}
-                      <div className="progress-actions">
-                        <button className="next-btn" onClick={goToNextLecture}>Start Next</button>
-                        <button className="cancel-btn" onClick={cancelAutoProgress}>Stay Here</button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+              {showCompletionMessage && (
+  <div className="video-completion-overlay">
+    <div className="completion-content">
+      <div className="completion-checkmark">✓</div>
+      <h3 className="completion-title">Lecture Completed!</h3>
+      
+      {completed >= 100 ? (
+        <>
+          <p className="completion-subtitle">Congratulations! You've completed the course!</p>
+          
+          {certError && (
+            <div style={{
+              backgroundColor: '#f8d7da',
+              color: '#721c24',
+              padding: '10px',
+              borderRadius: '4px',
+              margin: '10px 0',
+              border: '1px solid #f5c6cb'
+            }}>
+              {certError}
+            </div>
+          )}
+
+          {certificateUrl ? (
+  <div style={{ margin: '15px 0' }}>
+    <button
+      onClick={() => window.open(`${server}${certificateUrl}`, '_blank')}
+      style={{
+        backgroundColor: '#28a745',
+        color: 'white',
+        border: 'none',
+        padding: '12px 24px',
+        borderRadius: '4px',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        margin: '5px'
+      }}
+    >
+      View Certificate
+    </button>
+  </div>
+) : (
+  <div className="progress-actions">
+    <button
+      className="certificate-btn"
+      onClick={handleGenerateCertificate}
+      disabled={generatingCert}
+      style={{
+        backgroundColor: generatingCert ? '#6c757d' : '#4CAF50',
+        color: 'white',
+        border: 'none',
+        padding: '12px 24px',
+        borderRadius: '4px',
+        fontSize: '16px',
+        fontWeight: 'bold',
+        cursor: generatingCert ? 'not-allowed' : 'pointer',
+        margin: '10px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px'
+      }}
+    >
+      {generatingCert ? (
+        <>
+          <Loading size="small" />
+          <span>Generating...</span>
+        </>
+      ) : (
+        <>
+          <span>Get Your Certificate</span>
+        </>
+      )}
+    </button>
+  </div>
+)}
+        </>
+      ) : (
+        <>
+          <p className="completion-subtitle">Great job finishing this content</p>
+          {autoProgressCountdown > 0 && (
+            <div className="auto-progress-notice">
+              <p>Next content in</p>
+              <div className="countdown-timer">{autoProgressCountdown}</div>
+            </div>
+          )}
+          <div className="progress-actions">
+            <button className="next-btn" onClick={goToNextLecture}>Start Next</button>
+            <button className="cancel-btn" onClick={cancelAutoProgress}>Stay Here</button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
               </div>
               <div className="video-info">
                 <h1>{lecture.title}</h1>
@@ -1002,7 +1287,13 @@ const Lecture = ({ user }) => {
         {questions.map((q, qIndex) => (
           <div
             key={qIndex}
-            
+            style={{
+              border: "1px solid #e0e0e0",
+              borderRadius: "8px",
+              padding: "20px",
+              marginBottom: "20px",
+              backgroundColor: "#fafafa"
+            }}
           >
             <div className="form-group">
               <label style={{
@@ -1153,66 +1444,81 @@ const Lecture = ({ user }) => {
   </div>
 )}
 
-
           <div className="lectures-list">
             <h3>Course Content</h3>
-            {getOrderedContent().map((item, i) => (
-              <div key={item._id} style={{ marginBottom: "10px" }}>
-                <div
-                  className={`content-item ${
-                    (lecture?._id === item._id && !showQuiz) || 
-                    (quizData?._id === item._id && showQuiz) ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    cancelAutoProgress();
-                    if (item.type === 'lecture') {
-                      fetchLecture(item._id);
-                      setShowQuiz(false);
-                    } else {
-                      fetchQuiz(item._id);
-                    }
-                  }}
-                  style={{
-                    cursor: "pointer",
-                    padding: "6px 10px",
-                    backgroundColor:
-                      (lecture?._id === item._id && !showQuiz) || 
-                      (quizData?._id === item._id && showQuiz) ? "#eee" : "transparent",
-                    borderRadius: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    borderLeft: item.type === 'quiz' ? "4px solid #6e48aa" : "4px solid #28a745"
-                  }}
-                >
-                  <span>
-                    {i + 1}. {item.title}
-                  </span>
-                  {user?.role === "admin" && (
-                    <button
-                      onClick={(ev) => {
-                        ev.stopPropagation();
-                        if (item.type === 'lecture') {
-                          deleteHandler(item._id);
-                        } else {
-                          deleteQuizHandler(item._id);
-                        }
-                      }}
-                      style={{
-                        backgroundColor: "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        color: "red",
-                        fontSize: "16px",
-                      }}
-                      title={`Delete ${item.type === 'quiz' ? 'Quiz' : 'Lecture'}`}
-                    >
-                      <TiTrash />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+           
+{getOrderedContent().map((item, i) => (
+  <div key={item._id} style={{ marginBottom: "10px" }}>
+          <div
+        className={`content-item ${
+          (lecture?._id === item._id && !showQuiz) || 
+          (quizData?._id === item._id && showQuiz) ? "active" : ""
+        }`}
+        onClick={() => {
+          cancelAutoProgress();
+          if (item.type === 'lecture') {
+            fetchLecture(item._id);
+            setShowQuiz(false);
+          } else {
+            fetchQuiz(item._id);
+          }
+        }}
+        style={{
+          cursor: "pointer",
+          padding: "6px 10px",
+          backgroundColor:
+            (lecture?._id === item._id && !showQuiz) || 
+            (quizData?._id === item._id && showQuiz) ? "#eee" : "transparent",
+          borderRadius: "4px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderLeft: item.type === 'quiz' ? "4px solid #6e48aa" : "4px solid #28a745"
+        }}
+      >
+      <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        {i + 1}. {item.title}
+        {(item.type === 'lecture' && progress?.completedLectures?.includes(item._id)) || 
+         (item.type === 'quiz' && progress?.completedQuizzes?.includes(item._id)) ? (
+          <span
+            style={{
+              background: "#28a745",
+              padding: "2px 6px",
+              borderRadius: "6px",
+              color: "white",
+              fontSize: "12px",
+              fontWeight: "bold"
+            }}
+          >
+            ✓
+          </span>
+        ) : null}
+      </span>
+      {user?.role === "admin" && (
+        <button
+          onClick={(ev) => {
+            ev.stopPropagation();
+            if (item.type === 'lecture') {
+              deleteHandler(item._id);
+            } else {
+              deleteQuizHandler(item._id);
+            }
+          }}
+          style={{
+            backgroundColor: "transparent",
+            border: "none",
+            cursor: "pointer",
+            color: "red",
+            fontSize: "16px",
+          }}
+          title={`Delete ${item.type === 'quiz' ? 'Quiz' : 'Lecture'}`}
+        >
+          🗑️
+        </button>
+      )}
+    </div>
+  </div>
+))}
           </div>
         </div>
       </div>

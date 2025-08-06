@@ -96,3 +96,15 @@
 .btn-cancel:hover {
   background-color: #c82333;
 }
+.search-container {
+  margin: 20px 0;
+}
+
+.category-search-input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 100%;
+  max-width: 400px;
+}

@@ -1,61 +1,129 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import "./dashboard.css";
 import { CourseData } from "../../context/CourseContext";
 import CourseCard from "../../components/coursecard/CourseCard";
-import Loading from "../../components/loading/Loading"; // Make sure this exists
+import Loading from "../../components/loading/Loading";
+import axios from "axios";
+import { server } from "../../main";
 
 const Dashboard = () => {
   const { mycourse, fetchMyCourse } = CourseData();
   const [activeFilter, setActiveFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [coursesWithProgress, setCoursesWithProgress] = useState([]);
 
-  // Fetch enrolled courses on mount only
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      await fetchMyCourse();
-      setLoading(false);
-    };
-    fetchData();
-  }, []); // DON'T include fetchMyCourse to avoid infinite loop
+  // Memoized progress calculation
+  const calculateCourseProgress = useCallback(async (course) => {
+    try {
+      const { data } = await axios.get(
+        `${server}/api/user/progress?course=${course._id}`,
+        {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        }
+      );
 
-  // Filter courses based on active filter
-  const filteredCourses = useMemo(() => {
-    if (!mycourse || mycourse.length === 0) return [];
+      const totalLectures = data.allLectures?.length || 0;
+      const totalQuizzes = data.allQuizzes?.length || 0;
+      const totalItems = totalLectures + totalQuizzes;
 
-    switch (activeFilter) {
-      case 'completed':
-        return mycourse.filter(course => course.completed || course.progress === 100);
-      case 'inProgress':
-        return mycourse.filter(course => !course.completed && course.progress !== 100 && (course.progress > 0 || course.started));
-      case 'all':
-      default:
-        return mycourse;
+      const completedLectures = data.completedLectures?.length || 0;
+      const completedQuizzes = data.completedQuizzes?.length || 0;
+      const completedItems = completedLectures + completedQuizzes;
+
+      const progress = totalItems > 0 
+        ? Math.round((completedItems / totalItems) * 100) 
+        : 0;
+
+      return {
+        ...course,
+        progress,
+        isCompleted: progress === 100,
+        inProgress: progress > 0 && progress < 100
+      };
+    } catch (error) {
+      console.error(`Progress error for course ${course._id}:`, error);
+      return {
+        ...course,
+        progress: 0,
+        isCompleted: false,
+        inProgress: false
+      };
     }
-  }, [mycourse, activeFilter]);
+  }, []);
 
-  // Calculate stats
+  // Fetch data only when needed
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      if (!mycourse || mycourse.length === 0) {
+        await fetchMyCourse();
+      }
+
+      if (isMounted && mycourse && mycourse.length > 0) {
+        setLoading(true);
+        try {
+          const progressPromises = mycourse.map(course => 
+            calculateCourseProgress(course)
+          );
+          const updatedCourses = await Promise.all(progressPromises);
+          if (isMounted) {
+            setCoursesWithProgress(updatedCourses);
+          }
+        } catch (error) {
+          console.error("Failed to load progress:", error);
+        } finally {
+          if (isMounted) {
+            setLoading(false);
+          }
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchMyCourse, mycourse?.length, calculateCourseProgress]);
+
+  // Memoized filtered courses
+  const filteredCourses = useMemo(() => {
+    if (!coursesWithProgress || coursesWithProgress.length === 0) return [];
+
+    return coursesWithProgress.filter(course => {
+      switch (activeFilter) {
+        case 'completed':
+          return course.isCompleted;
+        case 'inProgress':
+          return course.inProgress;
+        default:
+          return true;
+      }
+    });
+  }, [coursesWithProgress, activeFilter]);
+
+  // Memoized stats
   const stats = useMemo(() => {
-    if (!mycourse || mycourse.length === 0) {
+    if (!coursesWithProgress || coursesWithProgress.length === 0) {
       return { total: 0, completed: 0, inProgress: 0 };
     }
 
-    const completed = mycourse.filter(course => course.completed || course.progress === 100).length;
-    const inProgress = mycourse.filter(course => !course.completed && course.progress !== 100 && (course.progress > 0 || course.started)).length;
-
     return {
-      total: mycourse.length,
-      completed,
-      inProgress
+      total: coursesWithProgress.length,
+      completed: coursesWithProgress.filter(c => c.isCompleted).length,
+      inProgress: coursesWithProgress.filter(c => c.inProgress).length,
     };
-  }, [mycourse]);
+  }, [coursesWithProgress]);
 
   const handleFilterChange = (filter) => {
     setActiveFilter(filter);
   };
 
   if (loading) {
-    return <Loading />; // Your existing loading component
+    return <Loading />;
   }
 
   return (
@@ -80,11 +148,6 @@ const Dashboard = () => {
               <span className="stat-label">In Progress</span>
             </div>
           </div>
-        </div>
-        <div className="header-decoration">
-          <div className="floating-shape shape-1"></div>
-          <div className="floating-shape shape-2"></div>
-          <div className="floating-shape shape-3"></div>
         </div>
       </div>
 
@@ -119,29 +182,18 @@ const Dashboard = () => {
         </div>
 
         <div className="dashboard-content">
-          {filteredCourses && filteredCourses.length > 0 ? (
+          {filteredCourses.length > 0 ? (
             <div className="courses-grid">
               {filteredCourses.map((course) => (
-                <div key={course._id} className="course-wrapper">
-                  <CourseCard course={course} />
-                </div>
+                <CourseCard 
+                  key={course._id} 
+                  course={course} 
+                />
               ))}
             </div>
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M19 3H5C3.89 3 3 3.89 3 5V19C3 20.11 3.89 21 5 21H19C20.11 21 21 20.11 21 19V5C21 3.89 20.11 3 19 3ZM19 19H5V5H19V19Z"
-                    fill="currentColor"
-                    opacity="0.3"
-                  />
-                  <path
-                    d="M7 9H17V11H7V9ZM7 13H14V15H7V13Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </div>
+              <div className="empty-icon">📚</div>
               <h3 className="empty-title">
                 {activeFilter === 'all'
                   ? 'No courses enrolled yet'
@@ -151,23 +203,17 @@ const Dashboard = () => {
               </h3>
               <p className="empty-description">
                 {activeFilter === 'all'
-                  ? 'Start your learning journey by exploring our course catalog'
+                  ? 'Get started by exploring our course catalog'
                   : activeFilter === 'completed'
-                  ? 'Complete some courses to see them here'
-                  : 'Start learning to see your progress here'}
+                  ? 'Keep learning to complete your courses'
+                  : 'Start a course to see it here'}
               </p>
               {activeFilter === 'all' && (
-                <button className="cta-button">
-                  <span>Browse Courses</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M5 12H19M19 12L12 5M19 12L12 19"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                <button 
+                  className="cta-button"
+                  onClick={() => {/* Add navigation to courses */}}
+                >
+                  Browse Courses
                 </button>
               )}
             </div>

@@ -7,6 +7,8 @@ import { Payment } from "../models/Payment.js";
 import { sendReceiptMail } from "../middlewares/sendReceiptMail.js";
 import { sendRefundMail } from "../middlewares/sendRefundMail.js";
 import { sendAdminRefundMail } from "../middlewares/adminRefundMail.js";
+import { Progress } from "../models/Progress.js";
+import { Quiz } from "../models/Quiz.js";
 
 // Get all courses
 export const getAllCourses = TryCatch(async (req, res) => {
@@ -139,6 +141,12 @@ export const paymentVerification = TryCatch(async (req, res) => {
     });
 
     await user.save();
+     await Progress.create({
+      course: course._id,
+      completedLectures: [],
+      completedQuizzes: [],
+      user: user._id,  
+    });
 
     await sendReceiptMail({
       firstName: user.firstName || "User",
@@ -152,7 +160,6 @@ export const paymentVerification = TryCatch(async (req, res) => {
   res.status(200).json({ message: "Course purchased successfully" });
 });
 
-// Refund course and send refund emails
 export const refundCourse = TryCatch(async (req, res) => {
   const userId = req.user._id.toString();
   const courseId = req.params.id.toString();
@@ -208,12 +215,18 @@ export const refundCourse = TryCatch(async (req, res) => {
     payment_intent: payment.stripe_payment_intent_id,
   });
 
+  // Remove the course from the user's subscription
   user.subscription = user.subscription.filter(id => id.toString() !== courseId);
   await user.save();
 
+  // Update payment status
   payment.status = "refunded";
   await payment.save();
 
+  // ❌ Delete progress record for this user and course
+  await Progress.deleteOne({ user: userId, course: courseId });
+
+  // Notify user and admin
   await sendRefundMail({
     firstName: user.firstName || "User",
     lastName: user.lastName || "",
@@ -231,4 +244,116 @@ export const refundCourse = TryCatch(async (req, res) => {
   });
 
   res.status(200).json({ message: "Refund processed successfully" });
+});
+export const addProgress = TryCatch(async (req, res) => {
+  const progress = await Progress.findOne({
+    user: req.user._id,
+    course: req.query.course,
+  });
+
+  const { lectureId, quizId } = req.query; // or req.body
+
+  if (!progress) {
+    return res.status(404).json({ message: "Progress not found" });
+  }
+
+  if (lectureId) {
+    if (progress.completedLectures.includes(lectureId)) {
+      return res.json({ message: "Progress recorded" });
+    }
+    progress.completedLectures.push(lectureId);
+  } else if (quizId) {
+    if (progress.completedQuizzes.includes(quizId)) {
+      return res.json({ message: "Progress recorded" });
+    }
+    progress.completedQuizzes.push(quizId);
+  } else {
+    return res.status(400).json({ message: "No lectureId or quizId provided" });
+  }
+
+  await progress.save();
+
+  res.status(201).json({
+    message: "New progress added",
+  });
+});
+
+
+
+export const getYourProgress = TryCatch(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const courseId = req.query.course;
+
+    const lectures = await Lecture.find({ course: courseId });
+    const quizzes = await Quiz.find({ course: courseId });
+
+    const totalLectures = lectures.length;
+    const totalQuizzes = quizzes.length;
+    const totalItems = totalLectures + totalQuizzes;
+
+    let progress = await Progress.findOne({ user: userId, course: courseId });
+
+    if (!progress) {
+      const user = await User.findById(userId);
+
+     if (
+  !user.subscription.includes(courseId) &&
+  user.role !== "admin" &&
+  user.role !== "superadmin"
+) {
+  return res.status(403).json({
+    success: false,
+    message: "User not subscribed to this course",
+  });
+}
+
+      progress = await Progress.create({
+        user: userId,
+        course: courseId,
+        completedLectures: [],
+        completedQuizzes: [],
+      });
+
+      return res.status(200).json({
+        success: true,
+        courseProgressPercentage: 0,
+        completedItems: 0,
+        totalItems,
+        completedLectures: [],
+        completedQuizzes: [],
+        allLectures: lectures,
+        allQuizzes: quizzes,
+        progress,
+      });
+    }
+
+    const completedLectures = progress.completedLectures || [];
+    const completedQuizzes = progress.completedQuizzes || [];
+
+    const completedItems = completedLectures.length + completedQuizzes.length;
+
+    const percentage = totalItems > 0
+      ? Math.round((completedItems / totalItems) * 100)
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      courseProgressPercentage: percentage,
+      completedItems,
+      totalItems,
+      completedLectures,
+      completedQuizzes,
+      allLectures: lectures,
+      allQuizzes: quizzes,
+      progress,
+    });
+  } catch (error) {
+    console.error("Error in getYourProgress:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
 });

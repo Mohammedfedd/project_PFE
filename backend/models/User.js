@@ -42,6 +42,25 @@ const schema = new mongoose.Schema(
         ref: "Courses",
       },
     ],
+    certificates: [{
+      courseId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Courses",
+        required: true
+      },
+      certificateUrl: {
+        type: String,
+        required: true
+      },
+      issuedAt: {
+        type: Date,
+        default: Date.now
+      },
+      title: {
+        type: String,
+        required: true
+      }
+    }],
     resetPasswordExpire: Date,
   },
   {

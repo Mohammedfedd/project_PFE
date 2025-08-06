@@ -49,7 +49,7 @@ router.delete('/category/:id', isAuth, isAdmin, deleteCategory);
 
 // Educator Management
 router.post('/educator', isAuth, isAdmin, createEducator);
-router.get('/educators', isAuth, getAllEducators);
+router.get('/educators', getAllEducators);
 router.put('/educator/:id', isAuth, isAdmin, updateEducator);
 router.delete('/educator/:id', isAuth, isAdmin, deleteEducator);
 

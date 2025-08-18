@@ -182,50 +182,59 @@ const AdminCourses = ({ user }) => {
                     <td>{course.price}</td>
                     <td>{course.createdBy}</td> {/* You might want to replace this with educator name if stored differently */}
                     <td>{course.duration}</td>
-                    <td>
-                      <button
-                        style={{
-                          backgroundColor: course.comingSoon ? "#d43f8d" : "#7e3ff2",
-                          color: "white",
-                          border: "none",
-                          borderRadius: 6,
-                          padding: "6px 12px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => toggleComingSoon(course._id)}
-                      >
-                        {course.comingSoon ? "Yes" : "No"}
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => deleteHandler(course._id)}
-                        style={{
-                          backgroundColor: "red",
-                          color: "white",
-                          border: "none",
-                          borderRadius: 6,
-                          padding: "6px 12px",
-                          cursor: "pointer",
-                          marginRight: 6,
-                        }}
-                      >
-                        Delete
-                      </button>
-                      <button
-                        onClick={() => navigate(`/lectures/${course._id}`)}
-                        style={{
-                          backgroundColor: "#7e3ff2",
-                          color: "white",
-                          border: "none",
-                          borderRadius: 6,
-                          padding: "6px 12px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Add Lectures
-                      </button>
-                    </td>
+                   <td>
+  <button
+    onClick={() => deleteHandler(course._id)}
+    style={{
+      backgroundColor: "red",
+      color: "white",
+      border: "none",
+      borderRadius: 6,
+      padding: "6px 12px",
+      cursor: "pointer",
+      marginRight: 6,
+    }}
+  >
+    Delete
+  </button>
+  <button
+    onClick={() => navigate(`/lectures/${course._id}`)}
+    style={{
+      backgroundColor: "#7e3ff2",
+      color: "white",
+      border: "none",
+      borderRadius: 6,
+      padding: "6px 12px",
+      cursor: "pointer",
+      marginRight: 6,
+    }}
+  >
+    Add Content
+  </button>
+  <button
+    onClick={async () => {
+      if (!window.confirm("Are you sure you want to delete all progress for this course?")) return;
+      try {
+        await axios.delete(`${server}/api/progress/${course._id}`, {
+          headers: { token: localStorage.getItem("token") },
+        });
+        toast.success("Course progress deleted successfully");
+      } catch {
+        toast.error("Failed to delete course progress");
+      }
+    }}
+    style={{
+      backgroundColor: "#ff9900",
+      color: "white",
+      border: "none",
+      borderRadius: 6,
+      padding: "6px 12px",
+      cursor: "pointer",
+    }}
+  >
+    Delete Progress
+  </button>
+</td>
                   </tr>
                 ))}
               </tbody>

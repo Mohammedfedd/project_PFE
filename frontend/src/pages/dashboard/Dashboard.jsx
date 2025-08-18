@@ -53,39 +53,33 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
+  fetchMyCourse();
+}, []); // fetch once on mount
 
-    const fetchData = async () => {
-      if (!mycourse || mycourse.length === 0) {
-        await fetchMyCourse();
-      }
+useEffect(() => {
+  if (!mycourse || mycourse.length === 0) {
+    setCoursesWithProgress([]); // avoid infinite loop when no courses
+    setLoading(false);
+    return;
+  }
 
-      if (isMounted && mycourse && mycourse.length > 0) {
-        setLoading(true);
-        try {
-          const progressPromises = mycourse.map(course => 
-            calculateCourseProgress(course)
-          );
-          const updatedCourses = await Promise.all(progressPromises);
-          if (isMounted) {
-            setCoursesWithProgress(updatedCourses);
-          }
-        } catch (error) {
-          console.error("Failed to load progress:", error);
-        } finally {
-          if (isMounted) {
-            setLoading(false);
-          }
-        }
-      }
-    };
+  let isMounted = true;
 
-    fetchData();
+  const fetchProgress = async () => {
+    setLoading(true);
+    const progressPromises = mycourse.map(c => calculateCourseProgress(c));
+    const updated = await Promise.all(progressPromises);
+    if (isMounted) {
+      setCoursesWithProgress(updated);
+      setLoading(false);
+    }
+  };
 
-    return () => {
-      isMounted = false;
-    };
-  }, [fetchMyCourse, mycourse?.length, calculateCourseProgress]);
+  fetchProgress();
+
+  return () => { isMounted = false };
+}, [mycourse]); // recalc progress only when mycourse changes
+
 
   // Filter courses by search term (case-insensitive)
   const searchedCourses = useMemo(() => {
